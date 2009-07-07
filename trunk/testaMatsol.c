@@ -29,6 +29,7 @@ void msTeste(int tam, int n)
 		}
 		for(j=0; j<n; j++)
 		{
+			msImprimeMatSol(vetms[j]);
 			msDelMatSol(vetms[j]);
 		}
 		media = soma/quant;
@@ -40,6 +41,8 @@ void msTeste(int tam, int n)
 int main(int argc, char **argv)
 {
 	int tam, quant;
+	if(argc < 2)
+		printf("Uso: %s [tamanhoRede] [quantMatSol]\ndefault: tamanhoRede=10, quantMatSol=100\n", argv[0]);
 	if(argc > 1)
 		tam = atoi(argv[1]);
 	else

@@ -75,3 +75,36 @@ int mtioAlign(float n)
 	return i;
 }
 
+/* Localiza parametro em arquivo de dados MathProg */
+int mtioLocalizaParametroInt(char *dados, char *parametro)
+{
+	FILE *arq;
+	char s[1024];
+	int valor, encontrado;
+	encontrado = 0;
+	valor = -1;
+	arq = fopen(dados, "r");
+	do
+	{
+		fscanf(arq, "%s", s);
+		if(!strcmp(s, "param"))
+		{
+			fscanf(arq, "%s", s);
+			if(!strcmp(s, parametro))
+			{
+				fscanf(arq, "%s", s);
+				if(!strcmp(s, ":="))
+				{
+					fscanf(arq, "%d", &valor);
+					encontrado = 1;
+					//printf("%d\n",valor);
+				}
+			}
+		}
+	}
+	while(!feof(arq) && !encontrado);
+	
+	return valor;
+}
+
+

@@ -3,12 +3,14 @@
 
 typedef struct matSol
 {
-	int **b;
-	int ordem;
+	char **b;
 	int *qLin, *qCol;
+	int ordem;
 } *MatSol;
 
 /* =============================================== */
+
+
 
 /* Atribui zero a todas posicoes da matriz em ms */
 void msZeraMatSol(MatSol ms)
@@ -38,12 +40,32 @@ void msMisturaVetor(int tam, int *anel)
 void msIncrementaMatSol(MatSol ms, int i, int j)
 ;
 
+/* Decrementa 1 na posicao (i,j) de b */
+void msDecrementaMatSol(MatSol ms, int i, int j)
+;
+
+/* Atribui val na posicao (i,j) de b */
+void msAtribuiMatSol(MatSol ms, int i, int j, int val)
+;
+
+/* Adiciona enlace atribuindo 1 na posicao (i,j) de b */
+void msAdicionaEnlace(MatSol ms, int i, int j)
+;
+
+/* Adiciona enlace atribuindo 1 na posicao (i,j) de b restringindo a um valor maximo e a um grau logico */
+void msAdicionaEnlaceMaxGL(MatSol ms, int i, int j, int max, int gl)
+;
+
+/* Remove enlace atribuindo 0 na posicao (i,j) de b */
+int msRemoveEnlace(MatSol ms, int i, int j)
+;
+
 /* Atribui um vetor como anel em ms */
 void msAtribuiAnelMatSol(MatSol ms, int *anel)
 ;
 
 /* Atribui um vetor como anel em ms com valor maximo*/
-void msAtribuiAnelMatSolMax(MatSol ms, int *anel, int max)
+void msAtribuiAnelMatSolMax(MatSol ms, int *anel, int max, int gl)
 ;
 
 /* Atribui um vetor como anel full duplex em ms com valor maximo*/
@@ -74,7 +96,9 @@ MatSol msRLDAMalhaGLSimetrico(int ordem, int gl)
 float msSimilaridade(MatSol ms1, MatSol ms2)
 ;
 
-
+/* Atribui a ms uma topologia totalmente conectada */
+void msTotalmenteConexa(MatSol ms)
+;
 
 #endif
 

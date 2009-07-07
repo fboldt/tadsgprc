@@ -1,9 +1,6 @@
 #ifndef __MATTRAF_IO_H_
 #define __MATTRAF_IO_H_
-
-
-
-#define TAM_STR 128
+#include "mattraf.h"
 
 /* Grava vetor de MatTraf no formato MatProg */
 void mtioGravaVetMatTraf(char *nomeBase, int tamVet, MatTraf *vetMT, char *param)
@@ -20,6 +17,9 @@ float mtioMaxElem(int tam, float **m)
 int mtioAlign(float n)
 ;
 
+/* Localiza parametro em arquivo de dados MathProg */
+int mtioLocalizaParametroInt(char *dados, char *parametro)
+;
 
 #endif
 
