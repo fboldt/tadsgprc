@@ -14,16 +14,14 @@ glpkwrapper:
 	gcc -c glpkwrapper.c -Wall
 
 matsol:
-	@make toolkit
-	gcc -c matsol.c -Wall
+	gcc toolkit.c -c matsol.c -Wall
 
 testaMatsol:
 	@make matsol
 	gcc testaMatsol.c -o testaMatsol.bin -Wall "toolkit.o" "matsol.o" -lm
 
 mattraf:
-	@make toolkit
-	gcc -c mattraf.c -Wall
+	gcc toolkit.c -c mattraf.c -Wall
 
 mattraf_io:
 	@make mattraf
