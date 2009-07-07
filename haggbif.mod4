@@ -1,0 +1,58 @@
+# Formulacao do Modelo Agregado com Roteamento de Trafego Bifurcado com Otimizacao do Congestionamento [Ramaswami, 96]
+# Descricao do Modelo em MathProg por Gustavo Coutinho Fernandes (gustavo_ufes@yahoo.com.br)
+
+# PARAMETROS
+
+# 1 - Numero de nos da rede 
+param N, integer, > 0;
+
+# 2 - Conjunto de indices
+set I := 1..N;
+
+# 3 - Matriz de Trafego
+param Delta{s in I, d in I};
+
+# 4 - Somas do trafego partindo de cada no
+param hs{s in I}  :=  sum{d in I: d!=s} Delta[s,d];
+
+# VARIAVEIS
+
+# 1 - Matriz da topologia virtual
+var B{i in I, j in I}, binary;
+
+# 2 - Parcela de trafego vindo de "s" passando pelo enlace (i,j)
+var h{i in I, j in I, s in I: j!=s} >= 0;
+
+# 3 - trafego transportado atraves do caminho optico que interliga os nos (i,j)
+var H{i in I, j in I} >= 0;
+
+# 4 - Congestionamento m aximo
+var Hmax >=0;
+
+# RESTRICOES
+
+# 1 - Restricao de limitacao de fluxo sem plano de corte
+s.t.  limit{i in I, j in I}: Hmax >= H[i,j];
+
+# 2 - Restricao de limitacao de fluxo tipo 2
+s.t.  limit2{i in I, j in I, s in I: j!=s}: h[i,j,s] <= (B[i,j] * hs[s]);
+
+# 3 - Restricao de conservacao de trafego tipo 1
+s.t.  conserv1{i in I, j in I}: H[i,j] = sum{s in I: j!=s} h[i,j,s];
+
+# 4 - Restricao de conservacao de trafego tipo 2
+s.t.  conserv2{i in I, s in I}: 
+      sum{j in I: j!=s} h[i,j,s] - sum{j in I: i!=s} h[j,i,s] =
+	if (s!=i) then -Delta[s,i] else hs[s];
+
+# FUNCAO OBJETIVO
+
+minimize congestionamento: Hmax;
+end;
+
+
+
+
+
+
+

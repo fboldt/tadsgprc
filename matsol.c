@@ -2,7 +2,9 @@
 #include "toolkit.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
+#include <math.h>
 
 /* Atribui zero a todas posicoes da matriz em ms */
 void msZeraMatSol(MatSol ms)
@@ -22,11 +24,11 @@ MatSol msNewMatSol(int ordem)
 {
 	int i;
 	MatSol ms = (MatSol)malloc(sizeof(struct matSol));
-	ms->b = (int**)tkAlocaMatriz(ordem, ordem, sizeof(int));
-	ms->ordem = ordem;
-	msZeraMatSol(ms);
+	ms->b = (char**)tkAlocaMatriz(ordem, ordem, sizeof(char));
 	ms->qLin = tkAlocaVetor(ordem, sizeof(int));
 	ms->qCol = tkAlocaVetor(ordem, sizeof(int));
+	ms->ordem = ordem;
+	msZeraMatSol(ms);
 	for(i=0; i<ordem; i++)
 	{
 		ms->qLin[i] = 0;
@@ -85,6 +87,57 @@ void msIncrementaMatSol(MatSol ms, int i, int j)
 	ms->qCol[j]++;
 }
 
+/* Decrementa 1 na posicao (i,j) de b */
+void msDecrementaMatSol(MatSol ms, int i, int j)
+{
+	ms->b[i][j]--;
+	ms->qLin[i]--;
+	ms->qCol[j]--;
+}
+
+/* Atribui val na posicao (i,j) de b */
+void msAtribuiMatSol(MatSol ms, int i, int j, int val)
+{
+	ms->b[i][j] = val;
+	ms->qLin[i] += val;
+	ms->qCol[j] += val;
+}
+
+/* Adiciona enlace atribuindo 1 na posicao (i,j) de b */
+void msAdicionaEnlace(MatSol ms, int i, int j)
+{
+	ms->b[i][j] = 1;
+	ms->qLin[i] += 1;
+	ms->qCol[j] += 1;
+}
+
+/* Adiciona enlace atribuindo 1 na posicao (i,j) de b restringindo a um valor maximo e a um grau logico */
+void msAdicionaEnlaceMaxGL(MatSol ms, int i, int j, int max, int gl)
+{
+	if(ms->b[i][j]+1<max && ms->qLin[i]<gl && ms->qCol[j]<gl)
+	{
+		ms->b[i][j]++;
+		ms->qLin[i]++;
+		ms->qCol[j]++;
+	}
+}
+
+/* Remove enlace decrementando 1 na posicao (i,j) de b */
+int msRemoveEnlace(MatSol ms, int i, int j)
+{
+	if(ms->qLin[i]>1 && ms->qCol[j]>1)
+	{
+		ms->b[i][j]--;
+		ms->qLin[i]--;
+		ms->qCol[j]--;
+	}
+	else
+	{
+		return 0;
+	}
+	return 1;
+}
+
 /* Atribui um vetor como anel em ms */
 void msAtribuiAnelMatSol(MatSol ms, int *anel)
 {
@@ -97,8 +150,26 @@ void msAtribuiAnelMatSol(MatSol ms, int *anel)
 	}
 }
 
+void msCompletaGL(MatSol ms, int max, int gl)
+{
+	int i, j;
+	for(i=0; i<ms->ordem; i++)
+	{
+		if(ms->qLin[i] < gl)
+		{
+			for(j=0; j<ms->ordem; j++)
+			{
+				if(i!=j && ms->qCol[j]<gl && ms->b[i][j]<max)
+				{
+					msIncrementaMatSol(ms, i, j);
+				}
+			}
+		}
+	}
+}
+
 /* Atribui um vetor como anel em ms com valor maximo*/
-void msAtribuiAnelMatSolMax(MatSol ms, int *anel, int max)
+void msAtribuiAnelMatSolMax(MatSol ms, int *anel, int max, int gl)
 {
 	int i, j, a, b, ok, salto;
 	for(a=0; a<ms->ordem; a++)
@@ -107,9 +178,9 @@ void msAtribuiAnelMatSolMax(MatSol ms, int *anel, int max)
 		j = anel[(a+1)%ms->ordem];
 		ok = 0;
 		salto = ms->ordem/2;
-		for(b=0; b<(ms->ordem+ms->ordem/2) && !ok; b++)
+		for(b=0; b<ms->ordem && !ok; b++)
 		{
-			if(ms->b[i][j] < max && i!=j)
+			if(ms->b[i][j] < max && i!=j && ms->qLin[i]<gl && ms->qCol[j]<gl)
 			{
 				msIncrementaMatSol(ms, i, j);
 				ok = 1;
@@ -121,6 +192,7 @@ void msAtribuiAnelMatSolMax(MatSol ms, int *anel, int max)
 			}
 		}
 	}
+	msCompletaGL(ms, max, gl);
 }
 
 /* Atribui um vetor como anel full duplex em ms com valor maximo*/
@@ -169,20 +241,31 @@ void msAnelBasico(MatSol ms)
 void msImprimeMatSol(MatSol ms)
 {
 	int i, j;
-	for(i=0; i<ms->ordem; i++)
-		printf("%d ", ms->qLin[i]);
-	printf("\n");
-	for(i=0; i<ms->ordem; i++)
-		printf("--");
+	char fmt[32];
 	printf("\n");
 	for(i=0; i<ms->ordem; i++)
 	{
 		for(j=0; j<ms->ordem; j++)
 		{
-			printf("%d ", ms->b[i][j]);
+			sprintf(fmt, "%%%dd ", (int)(log(ms->qCol[j]-2>0?ms->qCol[j]-2:1)));
+			printf(fmt, ms->b[i][j]);
 		}
 		printf(" | %d \n", ms->qLin[i]);
 	}
+	for(i=0; i<ms->ordem; i++)
+	{
+		printf("--");
+		for(j=1; j<(int)(log(ms->qCol[i]-2>0?ms->qCol[i]-2:1)); j++)
+		{
+			printf("-");
+		}
+	}
+	printf("\n");
+	for(j=0; j<ms->ordem; j++)
+	{
+		printf("%d ", ms->qCol[j]);
+	}
+	printf("\n");
 }
 
 /* Cria matriz aleatoria em malha */
@@ -196,8 +279,8 @@ MatSol msRLDAMalhaGL(int ordem, int gl)
 	for(i=0;i<gl;i++)
 	{
 		msPreencheVetorAleatorio(ms->ordem, anel);
-		msAtribuiAnelMatSolMax(ms, anel, max);
-	}	
+		msAtribuiAnelMatSolMax(ms, anel, max, i+1);
+	}
 	return ms;
 }
 
@@ -212,7 +295,7 @@ MatSol msRLDAMalhaGLSimetrico(int ordem, int gl)
 	for(i=0;i<gl;i++)
 	{
 		msPreencheVetorAleatorio(ms->ordem, anel);
-		msAtribuiAnelMatSolMaxSimetrico(ms, anel, max, gl);
+		msAtribuiAnelMatSolMaxSimetrico(ms, anel, max, i+1);
 	}	
 	return ms;
 }
@@ -232,10 +315,28 @@ float msSimilaridade(MatSol ms1, MatSol ms2)
 		for(j=0; j<ordem; j++)
 		{
 			similaridade += ms1->b[i][j]>0 && ms1->b[i][j]==ms2->b[i][j];
+			//similaridade += ms1->b[i][j]==ms2->b[i][j];
 		}
 	}
 	similaridade /= ordem*ordem-ordem;
+	//similaridade /= ordem*ordem;
 	return similaridade;
 }
 
+/* Atribui a ms uma topologia totalmente conectada */
+void msTotalmenteConexa(MatSol ms)
+{
+	int i, j;
+	for(i=0; i<ms->ordem; i++)
+	{
+		for(j=0; j<ms->ordem; j++)
+		{
+			if(i!=j)
+			{
+				msAdicionaEnlace(ms, i, j);
+			}
+			//msAtribuiMatSol(ms, i, j, i=j);
+		}
+	}
+}
 

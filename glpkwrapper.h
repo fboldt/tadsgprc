@@ -9,32 +9,41 @@
 #define TK_CriaIndiceLP gwCriaIndiceLP
 #define TK_PosicaoVariavelLP gwPosicaoVariavelLP
 
+#define LPGW LPX*
+
+/* Fixa o valor a uma variavel inteira atribuindo esse valor ao upper bond e ao lower bound */
+void gwAtribuiValorPosicaoLP(LPGW lp, int pos, int valor)
+;
+
 // Faz a leitura do problema e gera o modelo linear
 // Inicializa estruturas de dados do LP, que eh um MILP,
 // pois os valores (bounds) das variaveis inteiras ainda nao foram setados
-LPX *gwCarregaModeloLP(char *modelo, char *dados, char *saida)
+LPGW gwCarregaModeloLP(char *modelo, char *dados, char *saida)
 ;
 
 /* Atribui parametros default em modelo lp */
-void gwAtribuiParametrosLP(LPX *lp)
+void gwAtribuiParametrosLP(LPGW lp)
 ;
 
 // Finaliza (desaloca) estruturas de dados do LP
-void gwFinalizaLP(LPX *lp)
+void gwFinalizaLP(LPGW lp)
 ;
 
 // Cria o indice de nomes no modelo LP
-void gwCriaIndiceLP(LPX *lp)
+void gwCriaIndiceLP(LPGW lp)
 ;
 
 // Descobre a posicao de dada variavel no modelo LP
-int gwPosicaoVariavelLP(char NomeVariavel[], LPX *lp)
+int gwPosicaoVariavelLP(LPGW lp, char *NomeVariavel)
 ;
 
 /* Retorna o valor da funcao objetivo de um lp */
-float gwValorLP(LPX *lp)
+double gwValorLP(LPGW lp)
 ;
 
+/* Retorna o valor de uma variavel em um lp em determinada posicao */
+double gwValorVariavel(LPGW lp, int posicao)
+;
 
 #endif
 
