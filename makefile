@@ -7,6 +7,9 @@ clean:
 toolkit:
 	gcc -c toolkit.c -Wall
 	
+testaToolkit:
+	gcc toolkit.c testaToolkit.c -o testaToolkit.bin -Wall
+	
 glpkwrapper:
 	gcc -c glpkwrapper.c -Wall
 
