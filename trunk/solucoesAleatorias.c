@@ -57,6 +57,12 @@ int main(int argc, char **argv)
 	int quantTestes;
 	quantTestes = 10;
 	
+	if(argc<3)
+	{
+		printf("\n\tUso: %s <modelo> <dados> [quantidade de testes]\n\n", argv[0]);
+		return -1;
+	}
+	
 	if(argc>3)
 		quantTestes = atoi(argv[3]);
 	

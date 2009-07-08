@@ -107,4 +107,48 @@ int mtioLocalizaParametroInt(char *dados, char *parametro)
 	return valor;
 }
 
+/* Realiza a leitura de um arquivo de dados do problema LP
+Retorna: Estrutura MatTraf preenchida 
+AVISO: FUNCAO EM TESTE!!! FUNCIONAMENTO IMPERFEITO!!! */
+MatTraf mtioCarregaMatTraf(char *NomeArqDados)
+{
+	int i, j, n;
+	char s[1024];
+	float valor;
+	FILE *ArqDados;
+	int tamRede;
+	//float **Matriz;
+	MatTraf mt;
+
+	// Abre arquivo de dados somente para leitura
+	ArqDados = fopen(NomeArqDados, "r");
+	if (ArqDados == NULL)
+	{
+		return NULL;
+	}
+	
+	// Le arquivo de dados para retornar o tamanho da rede
+	// e a matriz de trafego alocada e preenchida
+	fscanf(ArqDados, "%s%s%s%d%s", s, s, s, &n, s);
+	tamRede = n;
+	
+	mt = mtNewMatTraf(tamRede);
+	
+	//Matriz = (float**) AlocaMatriz(tamRede, tamRede, sizeof(float));
+	fgets(s, 1024, ArqDados);
+	fgets(s, 1024, ArqDados);
+	
+	// le arquivo de dados preenchendo a matriz de trafego
+	for (i=0; i<n; i++)
+	{
+		fscanf(ArqDados, "%s", s);
+		for (j=0; j<n; j++)
+		{
+			fscanf(ArqDados, "%f", &valor);
+			mt->h[i][j] = valor;
+		}
+	}
+	fclose(ArqDados);
+	return mt;
+}
 

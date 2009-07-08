@@ -1,7 +1,7 @@
 #include "glpkwrapper.h"
 #include "mattraf_io.h"
 #include "matsol.h"
-//#include "toolkit.h"
+#include "mattraf.h"
 #include "milp_hmax_agg.c"
 #include "ivtd.h"
 #include <string.h>
@@ -71,11 +71,15 @@ int removeEnlaceMenosCarregado(MatSol topologia, Hij *vetHij)
 /* Iterative Virtual Topology Design para Congestionamento */
 int ivtd_hmax(char *modelo, char *dados)
 {
-	int tamRede, posB11, posH11, sair, iteracao;
-	double valor;
+	int tamRede, posB11, posH11, sair, iteracao, grauLogicoMedio;
+	double valor, lowerBound;
 	LPGW lp;
 	MatSol topologia;
+	MatTraf matTraf;
 	Hij *vetHij;
+	
+	lowerBound = 0.0f;
+	grauLogicoMedio = 0;
 	
 	lp = gwCarregaModeloLP(modelo, dados, "foo.txt");
 	gwAtribuiParametrosLP(lp);
@@ -84,12 +88,20 @@ int ivtd_hmax(char *modelo, char *dados)
 	posB11 = gwPosicaoVariavelLP(lp, "Bij[1,1]");
 	posH11 = gwPosicaoVariavelLP(lp, "Hij[1,1]");
 	
-	tamRede = mtioLocalizaParametroInt(dados, "N");
+	matTraf = mtioCarregaMatTraf(dados);
+	if(matTraf != NULL)
+	{
+		tamRede = matTraf->ordem;
+	}
+	else
+	{	
+		tamRede = mtioLocalizaParametroInt(dados, "N");
+	}
 	topologia = msNewMatSol(tamRede);
 	msTotalmenteConexa(topologia);
 	
 	sair = 0;
-	iteracao = 1;
+	iteracao = 0;
 	
 	vetHij = ivtdAlocaVetorHij(tamRede*tamRede);
 	
@@ -98,7 +110,18 @@ int ivtd_hmax(char *modelo, char *dados)
 		//msImprimeMatSol(topologia);
 		hmaxAtribuiTopologiaBijLP(lp, topologia);
 		valor = gwValorLP(lp);
-		printf("Iteracao: %d - Congestionamento: %lf\n", iteracao, valor);
+		
+		printf("Iteracao: %d - Congestionamento: %lf", iteracao, valor);
+		//* Para imprimir o lower bound e o grau logico medio comente esta linha
+		if(matTraf != NULL)
+		{
+			grauLogicoMedio = (tamRede-1) - (iteracao/tamRede);
+			lowerBound = hmaxLBD(matTraf, grauLogicoMedio);
+			printf(" - LowerBound: %lf - grauLogicoMedio: %d", lowerBound, grauLogicoMedio);
+		}
+		//*/
+		printf("\n");
+		
 		ivtdAtualizaVetHij(lp, posH11, vetHij, tamRede);
 		
 		sair = !removeEnlaceMenosCarregado(topologia, vetHij);
@@ -107,7 +130,11 @@ int ivtd_hmax(char *modelo, char *dados)
 	printf("Congestionamento: %lf\nTopologia final:\n", valor);
 	msImprimeMatSol(topologia);
 	
-	ivtdLiberaVetorHij(tamRede*tamRede, vetHij);	
+	ivtdLiberaVetorHij(tamRede*tamRede, vetHij);
+	if(matTraf != NULL)
+	{
+		mtDelMatTraf(matTraf);
+	}
 	msDelMatSol(topologia);
 	gwFinalizaLP(lp);
 	return 0;
@@ -116,23 +143,24 @@ int ivtd_hmax(char *modelo, char *dados)
 /* Argumento de entrada obrigatorio: nome do arquivo de dados (matriz de trafego) */
 int main(int argc, char **argv)
 {
-	char nomeArqDados[256];
+	char nomeArqModelo[256], nomeArqDados[256];
 	int result;
 	
 	struct timeval t1, t2;
 	float tempo;
 	gettimeofday(&t1, NULL);
 	
-	if (argc == 2)
+	if (argc == 3)
 	{
-		strcpy(nomeArqDados, argv[1]);
+		strcpy(nomeArqModelo, argv[1]);
+		strcpy(nomeArqDados, argv[2]);
 	}
 	else
 	{
-		printf("Uso: %s <nomeArqDados>\n", argv[0]);
+		printf("Uso: %s <nomeArqModelo> <nomeArqDados>\n", argv[0]);
 		return -1;
 	}
-	result = ivtd_hmax("testes/milp_hmax_agg.mod", nomeArqDados);
+	result = ivtd_hmax(nomeArqModelo, nomeArqDados);
 	
 	gettimeofday(&t2, NULL);
 	tempo = (float) (t2.tv_sec-t1.tv_sec) + 1E-6*(float)(t2.tv_usec-t1.tv_usec);
