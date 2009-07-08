@@ -29,7 +29,7 @@ void msTeste(int tam, int n)
 		}
 		for(j=0; j<n; j++)
 		{
-			msImprimeMatSol(vetms[j]);
+			//msImprimeMatSol(vetms[j]);
 			msDelMatSol(vetms[j]);
 		}
 		media = soma/quant;

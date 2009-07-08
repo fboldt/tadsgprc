@@ -21,6 +21,12 @@ int mtioAlign(float n)
 int mtioLocalizaParametroInt(char *dados, char *parametro)
 ;
 
+/* Realiza a leitura de um arquivo de dados do problema LP
+Retorna: Estrutura MatTraf preenchida 
+AVISO: FUNCAO EM TESTE!!! FUNCIONAMENTO IMPERFEITO!!! */
+MatTraf mtioCarregaMatTraf(char *NomeArqDados)
+;
+
 #endif
 
 
