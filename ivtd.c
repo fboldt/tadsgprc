@@ -1,6 +1,7 @@
 #include "ivtd.h"
 #include "glpkwrapper.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 /* Aloca um estrutura Hij */
 Hij ivtdAlocaHij()

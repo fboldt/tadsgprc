@@ -1,6 +1,7 @@
 #include "mattraf.h"
 #include "toolkit.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 /* Construtor ConfigMatTraf */
 ConfigMatTraf mtNewConfigMatTraf()
@@ -241,5 +242,20 @@ MatTraf* mtVetMatTrafIntervalar(MatTraf m1, MatTraf m2, int intervalo)
 		vetMT[i] = mtMatTrafIntervalar(m1, m2, intervalo, i);
 	}
 	return vetMT;
+}
+
+/* Imprime no terminal de texto uma MatTraf */
+void mtImprimeMatTraf(MatTraf mt)
+{
+	int i, j;
+	printf("\n");
+	for(i=0; i<mt->ordem; i++)
+	{
+		for(j=0; j<mt->ordem; j++)
+		{
+			printf("%10.6f ", mt->h[i][j]);
+		}
+		printf("\n");
+	}
 }
 

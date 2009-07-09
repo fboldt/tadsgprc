@@ -78,6 +78,9 @@ MatTraf mtMatTrafIntervalar(MatTraf m1, MatTraf m2, int intervalo, int posicao)
 MatTraf* mtVetMatTrafIntervalar(MatTraf m1, MatTraf m2, int intervalo)
 ;
 
+/* Imprime no terminal de texto uma MatTraf */
+void mtImprimeMatTraf(MatTraf mt)
+;
 
 #endif
 

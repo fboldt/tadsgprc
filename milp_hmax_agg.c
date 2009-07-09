@@ -41,37 +41,5 @@ float hmaxLBD(MatTraf mt, int grauLogico)
 	return result/grauLogico;
 }
 
-/* Calcula congestionamento (Hmax - Ramaswami) */
-float hmaxCongestionamento(MatTraf mt, MatSol ms)
-{
-	float result;
-	MatTraf enlaces;
-	float vetIn[mt->ordem], vetOut[mt->ordem];
-	int i, j;
-	
-	result = 0.0f;
-	
-	if(mt->ordem != ms->ordem)
-		return -1;
-	
-	enlaces = mtNewMatTraf(mt->ordem);
-	
-	for(i=0; i<mt->ordem; i++)
-	{
-		vetIn[i] = vetOut[i] = 0.0f;
-	}
-	
-	for(i=0; i<mt->ordem; i++)
-	{
-		for(j=0; j<mt->ordem; j++)
-		{
-			vetOut[i] += mt->h[i][j];
-			vetIn[i] += mt->h[j][i];
-		}
-	}
-	
-	return result;
-}
-
 #endif
 
