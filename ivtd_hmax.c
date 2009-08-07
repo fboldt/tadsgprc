@@ -10,6 +10,7 @@
 #include <float.h>
 #include <time.h>
 #include <sys/time.h>
+#include <tgmath.h>
 
 
 /* Retorn 1 se localizar o enlace menos carregado e 
@@ -71,8 +72,8 @@ int removeEnlaceMenosCarregado(MatSol topologia, Hij *vetHij)
 /* Iterative Virtual Topology Design para Congestionamento */
 int ivtd_hmax(char *modelo, char *dados)
 {
-	int tamRede, posB11, posH11, sair, iteracao, grauLogicoMedio;
-	double valor, lowerBound;
+	int tamRede, posB11, posH11, sair, iteracao;
+	double valor, lowerBound, grauLogicoMedio;
 	LPGW lp;
 	MatSol topologia;
 	MatTraf matTraf;
@@ -115,9 +116,9 @@ int ivtd_hmax(char *modelo, char *dados)
 		//* Para imprimir o lower bound e o grau logico medio comente esta linha
 		if(matTraf != NULL)
 		{
-			grauLogicoMedio = (tamRede-1) - (iteracao/tamRede);
-			lowerBound = hmaxLBD(matTraf, grauLogicoMedio);
-			printf(" - LowerBound: %lf - grauLogicoMedio: %d", lowerBound, grauLogicoMedio);
+			grauLogicoMedio = (tamRede-1) - (((double)iteracao)/tamRede);
+			lowerBound = hmaxLBD(matTraf, rint(grauLogicoMedio));
+			printf(" - LowerBound: %lf - grauLogicoMedio: %f", lowerBound, grauLogicoMedio);
 		}
 		//*/
 		printf("\n");
