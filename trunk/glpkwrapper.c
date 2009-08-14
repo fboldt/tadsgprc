@@ -54,7 +54,7 @@ double gwValorLP(LPGW lp)
 	// Roda o simplex e testa erro
 	if (lpx_simplex(lp) != LPX_E_OK)
 	{           
-		exit(2);
+		return -1;
 	}
 	return lpx_get_obj_val(lp);
 }
