@@ -22,4 +22,7 @@ ivtd_hmax:
 testa_ga: testa_ga.c ga.c optical_network.c toolkit.c
 	gcc testa_ga.c ga.c optical_network.c toolkit.c glpkwrapper.c -o testa_ga -Wall -lglpk -g
 
+ivtd_hmax_esp:
+	gcc matsol.c glpkwrapper.c ivtd.c toolkit.c mattraf.c mattraf_io.c ivtd_hmax_esp.c -o ivtd_hmax_esp.bin -Wall -lglpk -lm
+	
 

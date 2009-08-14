@@ -12,6 +12,20 @@
 #include <sys/time.h>
 #include <tgmath.h>
 
+void hmaxAtribuiCompTraf(LPGW lp, LPGW lpEsp, int tamRede)
+{
+// refazer esta funcao cm base no procedimento de mudanca de coeficiente de variavel do lbi
+//no lbi, o hmax e adicionado como coeficiente nas restricoes do plano de corte
+/*	int posH1111, posH1111_esp, tam, k;
+	posH1111 = gwPosicaoVariavelLP(lp, "Hijsd[1,1,1,1]");
+	posH1111_esp = gwPosicaoVariavelLP(lpEsp, "Hijsd[1,1,1,1]");
+	tam = tamRede*tamRede*tamRede*tamRede;
+	for(k=0; k<tam; k++)
+	{
+		gwAtribuiValorPosicaoLP(lpEsp, (k+posH1111_esp), gwValorVariavel(lp, (k+posH1111)));
+	}
+*/
+}
 
 /* Retorn 1 se localizar o enlace menos carregado e 
 atribui a linha e a coluna aos parametros linHmin e colHmin, respectivamente */
@@ -59,11 +73,12 @@ int removeEnlaceMenosCarregado(MatSol topologia, Hij vetHij[], Hij hmin)
 }
 
 /* Iterative Virtual Topology Design para Congestionamento */
-int ivtd_hmax(char *modelo, char *dados)
+int ivtd_hmax(char *modelo, char *modeloEsp, char *dados)
 {
-	int tamRede, posB11, posH11, sair, iteracao, seccionou;
+	int tamRede, posB11, posH11, posB11_esp, posH11_esp, sair, iteracao, seccionou;
 	double valor, lowerBound, grauLogicoMedio, valorFinal;
 	LPGW lp;
+	LPGW lpEsp;
 	MatSol topologia;
 	MatTraf matTraf;
 	Hij *vetHij;
@@ -76,9 +91,16 @@ int ivtd_hmax(char *modelo, char *dados)
 	lp = gwCarregaModeloLP(modelo, dados, "foo.txt");
 	gwAtribuiParametrosLP(lp);
 	gwCriaIndiceLP(lp);
+
+	lpEsp = gwCarregaModeloLP(modeloEsp, dados, "fooo.txt");
+	gwAtribuiParametrosLP(lpEsp);
+	gwCriaIndiceLP(lpEsp);
 	
 	posB11 = gwPosicaoVariavelLP(lp, "Bij[1,1]");
 	posH11 = gwPosicaoVariavelLP(lp, "Hij[1,1]");
+	
+	posB11_esp = gwPosicaoVariavelLP(lpEsp, "Bij[1,1]");
+	posH11_esp = gwPosicaoVariavelLP(lpEsp, "Hij[1,1]");
 	
 	matTraf = mtioCarregaMatTraf(dados);
 	if(matTraf != NULL)
@@ -102,7 +124,12 @@ int ivtd_hmax(char *modelo, char *dados)
 	{
 		//msImprimeMatSol(topologia);
 		hmaxAtribuiTopologiaBijLP(lp, topologia);
+		hmaxAtribuiTopologiaBijLP(lpEsp, topologia);
+
 		valor = gwValorLP(lp);
+
+		hmaxAtribuiCompTraf(lp, lpEsp, tamRede);
+		gwValorLP(lpEsp);
 		
 		if(valor < 0)
 		{
@@ -131,7 +158,7 @@ int ivtd_hmax(char *modelo, char *dados)
 			printf("\n");
 			iteracao++;
 			
-			ivtdAtualizaVetHij(lp, posH11, vetHij, tamRede);
+			ivtdAtualizaVetHij(lpEsp, posH11_esp, vetHij, tamRede);
 			//seccionou = 0;
 		}
 		
@@ -148,30 +175,32 @@ int ivtd_hmax(char *modelo, char *dados)
 	}
 	msDelMatSol(topologia);
 	gwFinalizaLP(lp);
+	gwFinalizaLP(lpEsp);
 	return 0;
 }
 
 /* Argumento de entrada obrigatorio: nome do arquivo de dados (matriz de trafego) */
 int main(int argc, char **argv)
 {
-	char nomeArqModelo[256], nomeArqDados[256];
+	char nomeArqModelo[256], nomeArqmodeloEsp[256], nomeArqDados[256];
 	int result;
 	
 	struct timeval t1, t2;
 	float tempo;
 	gettimeofday(&t1, NULL);
 	
-	if (argc == 3)
+	if (argc == 4)
 	{
 		strcpy(nomeArqModelo, argv[1]);
-		strcpy(nomeArqDados, argv[2]);
+		strcpy(nomeArqmodeloEsp, argv[2]);
+		strcpy(nomeArqDados, argv[3]);
 	}
 	else
 	{
-		printf("Uso: %s <nomeArqModelo> <nomeArqDados>\n", argv[0]);
+		printf("Uso: %s <nomeArqModelo> <nomeArqmodeloEsp> <nomeArqDados>\n", argv[0]);
 		return -1;
 	}
-	result = ivtd_hmax(nomeArqModelo, nomeArqDados);
+	result = ivtd_hmax(nomeArqModelo, nomeArqmodeloEsp, nomeArqDados);
 	
 	gettimeofday(&t2, NULL);
 	tempo = (float) (t2.tv_sec-t1.tv_sec) + 1E-6*(float)(t2.tv_usec-t1.tv_usec);
