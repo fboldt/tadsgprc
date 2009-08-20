@@ -61,7 +61,7 @@ int removeEnlaceMenosCarregado(MatSol topologia, Hij vetHij[], Hij hmin)
 int ivtd_hmax(char *modelo, char *dados)
 {
 	int tamRede, posB11, posH11, sair, iteracao, seccionou;
-	double valor, lowerBound, grauLogicoMedio, valorFinal;
+	double fobjetivo, lowerBound, grauLogicoMedio, valorFinal;
 	LPGW lp;
 	MatSol topologia;
 	MatTraf matTraf;
@@ -101,9 +101,9 @@ int ivtd_hmax(char *modelo, char *dados)
 	{
 		//msImprimeMatSol(topologia);
 		hmaxAtribuiTopologiaBijLP(lp, topologia);
-		valor = gwValorLP(lp);
+		fobjetivo = gwResolveLP(lp);
 		
-		if(valor < 0)
+		if(fobjetivo < 0)
 		{
 			//readiciona enlace
 			msAdicionaEnlace(topologia, hmin->lin, hmin->col);
@@ -117,8 +117,8 @@ int ivtd_hmax(char *modelo, char *dados)
 		}
 		else
 		{
-			valorFinal = valor;
-			printf("Iteracao: %d - Congestionamento: %lf - num.enlaces: %d", iteracao, valor, tamRede*(tamRede-1)-iteracao);
+			valorFinal = fobjetivo;
+			printf("Iteracao: %d - Congestionamento: %lf - num.enlaces: %d", iteracao, fobjetivo, tamRede*(tamRede-1)-iteracao);
 			/* Para imprimir o lower bound e o grau logico medio comente esta linha
 			if(matTraf != NULL)
 			{

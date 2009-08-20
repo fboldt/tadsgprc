@@ -9,6 +9,7 @@
 #define TK_CriaIndiceLP gwCriaIndiceLP
 #define TK_PosicaoVariavelLP gwPosicaoVariavelLP
 #define gwAtribuiParametrosLP gwConfiguraGLPK
+#define gwValorLP gwResolveLP
 
 #define LPGW LPX*
 
@@ -39,7 +40,7 @@ int gwPosicaoVariavelLP(LPGW lp, char *NomeVariavel)
 ;
 
 /* Retorna o valor da funcao objetivo de um lp */
-double gwValorLP(LPGW lp)
+double gwResolveLP(LPGW lp)
 ;
 
 /* Retorna o valor de uma variavel em um lp em determinada posicao */
