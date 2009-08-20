@@ -1,6 +1,5 @@
 #include "gera_mattraf.h"
 #include "mattraf.h"
-#include "mattraf_io.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>

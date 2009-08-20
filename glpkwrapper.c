@@ -20,7 +20,7 @@ LPGW gwCarregaModeloLP(char *modelo, char *dados, char *saida)
 }
 
 /* Atribui parametros default em modelo lp */
-void gwAtribuiParametrosLP(LPGW lp)
+void gwConfiguraGLPK(LPGW lp)
 {
 	// Message Level: 0 - nothing; 1 - errors; 2 - normal; 3 - verbose.
 	lpx_set_int_parm(lp, LPX_K_MSGLEV, 0);

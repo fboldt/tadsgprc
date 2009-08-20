@@ -8,6 +8,7 @@
 #define TK_FinalizaLP gwFinalizaLP
 #define TK_CriaIndiceLP gwCriaIndiceLP
 #define TK_PosicaoVariavelLP gwPosicaoVariavelLP
+#define gwAtribuiParametrosLP gwConfiguraGLPK
 
 #define LPGW LPX*
 
@@ -22,7 +23,7 @@ LPGW gwCarregaModeloLP(char *modelo, char *dados, char *saida)
 ;
 
 /* Atribui parametros default em modelo lp */
-void gwAtribuiParametrosLP(LPGW lp)
+void gwConfiguraGLPK(LPGW lp)
 ;
 
 // Finaliza (desaloca) estruturas de dados do LP

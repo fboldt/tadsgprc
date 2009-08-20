@@ -1,5 +1,4 @@
 #include "matsol.h"
-#include "mattraf_io.h"
 #include "glpkwrapper.h"
 #include "milp_hmax_agg.c"
 #include <time.h>
@@ -30,7 +29,7 @@ void testeGL(LPGW lp, int tamRede, int gl, int n)
 		printf("%f\n", otimo);
 	}
 	//printf("\n");
-	printf("######### media: %f\t######### max: %f\t######### min: %f\n", media/n, max, min);
+	//printf("######### media: %f\t######### max: %f\t######### min: %f\n", media/n, max, min);
 }
 
 /* Imprime valor otimo de n testes para todos graus logicos possiveis */
@@ -52,7 +51,7 @@ void testes(char *modelo, char *dados, int quantTestes)
 	gwFinalizaLP(lp);
 }
 
-int main(int argc, char **argv)
+int solucoesAleatorias(int argc, char **argv)
 {
 	int quantTestes;
 	quantTestes = 10;
