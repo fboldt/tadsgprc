@@ -6,6 +6,13 @@
 #define SN 2
 #define MAXDIST 3
 
+#define mtioGravaVetMatTraf mtGravaVetMatTraf
+#define mtioGravaMatTrafMathProg mtGravaMatTrafMathProg
+#define mtioMaxElem mtMaxElem
+#define mtioAlign mtAlign
+#define mtioLocalizaParametroInt mtLocalizaParametroInt
+#define mtioCarregaMatTraf mtCarregaMatTraf
+
 typedef struct matTraf
 {
 	float **h;
@@ -80,6 +87,31 @@ MatTraf* mtVetMatTrafIntervalar(MatTraf m1, MatTraf m2, int intervalo)
 
 /* Imprime no terminal de texto uma MatTraf */
 void mtImprimeMatTraf(MatTraf mt)
+;
+
+/* Grava vetor de MatTraf no formato MatProg */
+void mtGravaVetMatTraf(char *nomeBase, int tamVet, MatTraf *vetMT, char *param)
+;
+
+/* Grava matriz no formato de dados em MathProg */
+void mtGravaMatTrafMathProg(char *fileName, MatTraf mt, char *param)
+;
+
+/* Retorna o maior elemento da matriz */
+float mtMaxElem(int tam, float **m)
+;
+/* Retorna a quantidade de casas antes da vírgula do número n */
+int mtAlign(float n)
+;
+
+/* Localiza parametro em arquivo de dados MathProg */
+int mtLocalizaParametroInt(char *dados, char *parametro)
+;
+
+/* Realiza a leitura de um arquivo de dados do problema LP
+Retorna: Estrutura MatTraf preenchida 
+AVISO: FUNCAO EM TESTE!!! FUNCIONAMENTO IMPERFEITO!!! */
+MatTraf mtCarregaMatTraf(char *NomeArqDados)
 ;
 
 #endif

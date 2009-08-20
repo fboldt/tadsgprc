@@ -1,5 +1,4 @@
 #include "glpkwrapper.h"
-#include "mattraf_io.h"
 #include "matsol.h"
 #include "mattraf.h"
 #include "milp_hmax_agg.c"
