@@ -49,7 +49,7 @@ int gwPosicaoVariavelLP(LPGW lp, char *NomeVariavel)
 }
 
 /* Retorna o valor da funcao objetivo de um lp */
-double gwValorLP(LPGW lp)
+double gwResolveLP(LPGW lp)
 {
 	// Roda o simplex e testa erro
 	if (lpx_simplex(lp) != LPX_E_OK)
