@@ -13,8 +13,8 @@ void hmaxAtribuiTopologiaBijLP(LPGW lp, MatSol ms)
 	tam = ms->ordem*ms->ordem;
 	for(k=0; k<tam; k++)
 	{
-		lin = k/tam;
-		col = k%tam;
+		lin = k/ms->ordem;
+		col = k%ms->ordem;
 		gwAtribuiValorPosicaoLP(lp, (k+posBij), ms->b[lin][col]);
 	}
 }
