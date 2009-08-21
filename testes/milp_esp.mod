@@ -18,7 +18,7 @@ set I := 1..N;
 param MatTraf{s in I, d in I};
 
 # 4 - Parcela de tráfego vindo de "s" passando pelo enlace (i,j)
-param Hijsd{i in I, j in I, s in I, d in I} = 0;
+param Hijsd{i in I, j in I, s in I, d in I} := 1;
 
 #############################################################
 ########################### VARIÁVEIS #######################

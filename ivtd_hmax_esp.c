@@ -10,20 +10,56 @@
 #include <time.h>
 #include <sys/time.h>
 #include <tgmath.h>
+#include <glpk.h>
 
-void hmaxAtribuiCompTraf(LPGW lp, LPGW lpEsp, int tamRede)
+void atribuiCompTraf(LPGW lp, LPGW lpEsp, int tamRede)
 {
-// refazer esta funcao cm base no procedimento de mudanca de coeficiente de variavel do lbi
-//no lbi, o hmax e adicionado como coeficiente nas restricoes do plano de corte
-/*	int posH1111, posH1111_esp, tam, k;
+	int i, k, posH1111, len, pos_restricao, pos_topologia, *ind;
+	double *coef;
+	//Encontrar a posicao da variavel Hijsd[1,1,1,1] em lp
 	posH1111 = gwPosicaoVariavelLP(lp, "Hijsd[1,1,1,1]");
-	posH1111_esp = gwPosicaoVariavelLP(lpEsp, "Hijsd[1,1,1,1]");
-	tam = tamRede*tamRede*tamRede*tamRede;
-	for(k=0; k<tam; k++)
+	// Encontra a posicao da restricao compval[i,j,s,d] que define os componentes de tráfego válidos HVijsd
+	pos_restricao = lpx_find_row(lpEsp, "compval[1,1,1,1]");
+	// Descobre o numero de coeficientes nao-nulos da restricao compval[i,j,s,d] 
+	len = lpx_get_mat_row(lpEsp, pos_restricao, NULL, NULL);
+	//printf("len=%d\n", len);
+	// Aloca memoria suficiente para armazenar indices das variaveis e valores dos coeficientes da restricao compval[i,j,s,d]
+	ind = (int*)    malloc((len+1)*sizeof(int));
+	coef = (double*) malloc((len+1)*sizeof(double));
+	//Acha a posicao da variavel Bijsd em lpEsp, cujo coeficiente sera alterado
+	pos_topologia = lpx_find_col(lpEsp, "Bijsd[1,1,1,1]");
+	// Toma valores das variáveis Hijsd de lp e atualiza valor dos coeficientes Hijsd das variáveis Bijsd em lpEsp
+	for (i=0; i<tamRede*tamRede*tamRede*tamRede; i++)
 	{
-		gwAtribuiValorPosicaoLP(lpEsp, (k+posH1111_esp), gwValorVariavel(lp, (k+posH1111)));
-	}
+		// Busca primeira linha da restricao compval[i,j,s,d] armazenando indices das variaveis e valores dos coeficientes
+		len = lpx_get_mat_row(lpEsp, pos_restricao+i, ind, coef);
+		// Busca posicao (k) do coeficiente Hijsd da variavel Bijsd
+		k = 1;
+		while (pos_topologia+i != ind[k])
+			k++;
+
+/*		if (gwValorVariavel(lp,posH1111+i))
+		{
+		printf("variavel selecionada em lpEsp cujo coeficiente sera alterado: %s\n", glp_get_col_name(lpEsp,ind[k]));
+		printf("valor original do coeficiente em lpEsp: %lf\n", coef[k]);
+		printf("valor do coeficiente retirando de lp: %lf\n", gwValorVariavel(lp, posH1111+i));
+		}
 */
+		coef[k] = -1*gwValorVariavel(lp, posH1111+i);
+		lpx_set_mat_row (lpEsp, pos_restricao+i, len, ind, coef);
+
+/*		if (gwValorVariavel(lp,posH1111+i))
+		{
+		lpx_get_mat_row (lpEsp, pos_restricao+i, ind, coef);
+		k = 1;
+		while (pos_topologia+i != ind[k])
+			k++;
+		printf(".................ATUALIZOU coeficiente em lpEsp\n");
+		printf("variavel selecionada em lpEsp cujo coeficiente FOI alterado: %s\n", glp_get_col_name(lpEsp,ind[k]));
+		printf("coeficiente da variável selecionada em lpEsp: %lf = %lf\n", coef[k], -1*gwValorVariavel(lp,posH1111+i));
+		}
+*/
+	}
 }
 
 /* Retorn 1 se localizar o enlace menos carregado e 
@@ -74,7 +110,7 @@ int removeEnlaceMenosCarregado(MatSol topologia, Hij vetHij[], Hij hmin)
 /* Iterative Virtual Topology Design para Congestionamento */
 int ivtd_hmax(char *modelo, char *modeloEsp, char *dados)
 {
-	int tamRede, posB11, posH11, posB11_esp, posH11_esp, sair, iteracao, seccionou;
+	int tamRede, posB11, posH11, posB11_esp, posH11_esp, sair, iteracao, seccionou, posH1111, i;
 	double valor, lowerBound, grauLogicoMedio, valorFinal;
 	LPGW lp;
 	LPGW lpEsp;
@@ -121,13 +157,20 @@ int ivtd_hmax(char *modelo, char *modeloEsp, char *dados)
 	
 	while(!sair)
 	{
-		//msImprimeMatSol(topologia);
+		msImprimeMatSol(topologia);
 		hmaxAtribuiTopologiaBijLP(lp, topologia);
 		hmaxAtribuiTopologiaBijLP(lpEsp, topologia);
 
 		valor = gwValorLP(lp);
 
-		hmaxAtribuiCompTraf(lp, lpEsp, tamRede);
+/*    posH1111 = gwPosicaoVariavelLP(lp, "Hijsd[1,1,1,1]");
+	for(i=0; i<tamRede*tamRede*tamRede*tamRede; i++)
+	{
+	if (gwValorVariavel(lp,posH1111+i))
+		printf("%s=%lf ",glp_get_col_name(lp,posH1111+i),gwValorVariavel(lp,posH1111+i));
+	}
+*/
+		atribuiCompTraf(lp, lpEsp, tamRede);
 		gwValorLP(lpEsp);
 		
 		if(valor < 0)
