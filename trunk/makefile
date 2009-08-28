@@ -7,8 +7,8 @@ clean:
 testaToolkit:
 	gcc toolkit.c testaToolkit.c -o testaToolkit.bin -Wall
 	
-testaMatsol:
-	gcc toolkit.c matsol.c testaMatsol.c -o testaMatsol.bin -Wall -lm
+testeSimilaridade:
+	gcc toolkit.c matsol.c testeSimilaridade.c -o testeSimilaridade.bin -Wall -lm
 
 geradorDeMatrizes:
 	gcc toolkit.c mattraf.c gera_mattraf.c geradorDeMatrizes.c -o geradorDeMatrizes.bin -Wall

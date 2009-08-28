@@ -155,14 +155,11 @@ void msCompletaGL(MatSol ms, int max, int gl)
 	int i, j;
 	for(i=0; i<ms->ordem; i++)
 	{
-		if(ms->qLin[i] < gl)
+		for(j=0; j<ms->ordem && ms->qLin[i]<gl; j++)
 		{
-			for(j=0; j<ms->ordem; j++)
+			if(i!=j && ms->qCol[j]<gl && ms->b[i][j]<max)
 			{
-				if(i!=j && ms->qCol[j]<gl && ms->b[i][j]<max)
-				{
-					msIncrementaMatSol(ms, i, j);
-				}
+				msIncrementaMatSol(ms, i, j);
 			}
 		}
 	}
@@ -303,8 +300,9 @@ MatSol msRLDAMalhaGLSimetrico(int ordem, int gl)
 /* Mede o grau de similaridade entre duas MatSol com valores entre 0 e 1 */
 float msSimilaridade(MatSol ms1, MatSol ms2)
 {
-	int i, j, ordem;
+	int i, j, ordem, enlaces;
 	float similaridade;
+	enlaces = 0;
 	similaridade = 0.0f;
 	if(ms1->ordem != ms2->ordem)
 		return 0.0f;
@@ -314,12 +312,14 @@ float msSimilaridade(MatSol ms1, MatSol ms2)
 	{
 		for(j=0; j<ordem; j++)
 		{
-			similaridade += ms1->b[i][j]>0 && ms1->b[i][j]==ms2->b[i][j];
-			//similaridade += ms1->b[i][j]==ms2->b[i][j];
+			if(ms1->b[i][j]>0)
+			{
+				enlaces++;
+				similaridade += ms1->b[i][j]==ms2->b[i][j];
+			}
 		}
 	}
-	similaridade /= ordem*ordem-ordem;
-	//similaridade /= ordem*ordem;
+	//similaridade /= enlaces;
 	return similaridade;
 }
 
