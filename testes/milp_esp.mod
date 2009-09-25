@@ -27,16 +27,16 @@ param Hijsd{i in I, j in I, s in I, d in I} := 1;
 # 1 - Matriz da topologia virtual
 var Bij{i in I, j in I}, binary;
 
-# 2 - Matriz da topologia virtual
+# 2 - Variáveis de decisão da Matriz da topologia virtual 
 var Bijsd{i in I, j in I, s in I, d in I}, binary;
 
-# 4 - Parcela de tráfego vindo de "s" passando pelo enlace (i,j)
+# 4 - Componente de tráfego válidos (V) vindo de "s" passando pelo enlace (i,j)
 var HVijsd{i in I, j in I, s in I, d in I} >= 0;
 
-# 5 - trafego transportado atraves do caminho optico que interliga os nós (i,j)
+# 5 - Trafego transportado pelo caminho optico que interliga os nós (i,j)
 var Hij{i in I, j in I } >= 0;
 
-# 6 - Tráfego total sem componentes espúrios
+# 6 - Tráfego total sem componentes espúrios 
 var Bnet >=0;
 
 #############################################################
