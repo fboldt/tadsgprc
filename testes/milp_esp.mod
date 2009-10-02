@@ -43,24 +43,24 @@ var Bnet >=0;
 ########################### RESTRIÇÕES ######################
 #############################################################
 
-# 1 - Definição dos componentes de tráfego válidos HVijsd
-s.t.  compval{i in I, j in I, s in I, d in I}: HVijsd[i,j,s,d] - Hijsd[i,j,s,d]*Bijsd[i,j,s,d] = 0;
-
-# 2 - Relaciona variáveis de decisão de componentes de tráfego com as de topologia logica
+# 1 - Relaciona variáveis de decisão de componentes de tráfego com as de topologia logica
 s.t.  relbijsdbij{i in I, j in I, s in I, d in I}: Bijsd[i,j,s,d] <= Bij[i,j];
 
-# 3 - Totalizacao do trafego valido
+# 2 - Totalizacao do trafego valido
 s.t. defBnet: Bnet = sum {i in I, j in I, s in I, d in I} Bijsd[i,j,s,d];
 
-# 4 - Restriçao de conservaçao de trafego tipo 1
+# 3 - Restriçao de conservaçao de trafego tipo 1
 s.t.  conserv1{i in I, j in I}: Hij[i,j] = sum{s in I, d in I} HVijsd[i,j,s,d];
 
-# 5 - Restriçao de conservaçao de trafego tipo 2
+# 4 - Restriçao de conservaçao de trafego tipo 2
 s.t.  conserv2{i in I, s in I, d in I}: 
 		sum {j in I} HVijsd[i,j,s,d] - sum {j in I} HVijsd[j,i,s,d] = 
 		(if s = i then MatTraf[s,d] 
 		else (if d = i then -MatTraf[s,d]
 		else 0));
+
+# 5 - Definição dos componentes de tráfego válidos HVijsd
+s.t.  compval{i in I, j in I, s in I, d in I}: HVijsd[i,j,s,d] - Hijsd[i,j,s,d]*Bijsd[i,j,s,d] = 0;
 
 #############################################################
 ######################## FUNÇÃO OBJETIVO ####################

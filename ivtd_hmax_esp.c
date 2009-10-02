@@ -14,62 +14,82 @@
 
 void atribuiCompTraf(LPGW lp, LPGW lpEsp, int tamRede)
 {
-	int i, k, posH1111, len, pos_restricao, pos_topologia, *ind;
+	int i, j, k, l, m, posHijsd, len, pos_restricao, pos_topologia, *ind;
 	double *coef;
-	//Encontrar a posicao da variavel Hijsd[1,1,1,1] em lp
-	posH1111 = gwPosicaoVariavelLP(lp, "Hijsd[1,1,1,1]");
-	printf("Posicao da variavel Hijsd[1,1,1,1] em lp = %d\n", posH1111);
+	char str[64], strB[64], strH[64];
+	
+//Atualiza o valor da variavel Hijsd de lp no coeficiente Hijsd*Bijsd das restricoes compval de lpEsp
+	for (i=0; i<tamRede; i++)
+		for (j=0; j<tamRede; j++)
+			for (k=0; k<tamRede; k++)
+				for (l=0; l<tamRede; l++)
+	{
+	//Encontrar a posicao da variavel Hijsd em lp
+	sprintf(strH, "Hijsd[%d,%d,%d,%d]", i+1, j+1, k+1, l+1);
+	posHijsd = gwPosicaoVariavelLP(lp, strH);
+//	if (gwValorVariavel(lp,posHijsd))
+//		printf("Posicao da variavel %s em lp = %d\n", strH, posHijsd);
+
 	// Encontra a posicao da restricao compval[i,j,s,d] que define os componentes de tráfego válidos HVijsd
-	pos_restricao = lpx_find_row(lpEsp, "compval[1,1,1,1]");
-	printf("Posicao da restricao compval[1,1,1,1] em lpEsp = %d\n", pos_restricao);
-	// Descobre o numero de coeficientes nao-nulos da restricao compval[i,j,s,d] 
+	sprintf(str, "compval[%d,%d,%d,%d]", i+1, j+1, k+1, l+1);
+	pos_restricao = lpx_find_row(lpEsp, str);
+//	if (gwValorVariavel(lp,posHijsd))
+//		printf("Posicao da restricao %s em lpEsp = %d\n", str, pos_restricao);
+
+	// Descobre o numero máximo de coeficientes nao-nulos da restricao compval[i,j,s,d] 
 	len = lpx_get_mat_row(lpEsp, pos_restricao, NULL, NULL);
-	printf("Numero de coeficientes nao-nulos da restricao compval[1,1,1,1] = %d\n", len);
+//	if (gwValorVariavel(lp,posHijsd))
+//		printf("Numero de coeficientes nao-nulos da restricao %s = %d\n", str, len);
 	// Aloca memoria suficiente para armazenar indices das variaveis e valores dos coeficientes da restricao compval[i,j,s,d]
 	ind = (int*)    malloc((len+1)*sizeof(int));
 	coef = (double*) malloc((len+1)*sizeof(double));
-	//Acha a posicao da variavel Bijsd em lpEsp, cujo coeficiente sera alterado
-	pos_topologia = lpx_find_col(lpEsp, "Bijsd[1,1,1,1]");
-	printf("Posicao da variavel Bijsd[1,1,1,1] em lpEsp = %d\n", pos_topologia);
-	// Toma valores das variáveis Hijsd de lp e atualiza valor dos coeficientes Hijsd das variáveis Bijsd em lpEsp
-	for (i=0; i<tamRede*tamRede*tamRede*tamRede; i++)
-	{
-		// Busca primeira linha da restricao compval[i,j,s,d] armazenando indices das variaveis e valores dos coeficientes
-		len = lpx_get_mat_row(lpEsp, pos_restricao+i, ind, coef); //!!!!!!!!!!!!! ISTO ESTA DANDO PAUUUUUU!!!! PORRA!!!!!
-		printf("testannndoooo");
-		printf("%lf x %s %lf x %s = 0", coef[1], glp_get_col_name(lpEsp,ind[1]), coef[2], glp_get_col_name(lpEsp,ind[2]));
-		// Busca posicao (k) do coeficiente Hijsd da variavel Bijsd
-		k = 1;
-		while (pos_topologia+(k-1) != ind[k])
-		{
-			k++;
-		}
-//*
-		if (gwValorVariavel(lp,posH1111+i))
-		{
-		printf("variavel selecionada em lpEsp cujo coeficiente sera alterado: %s\n", glp_get_col_name(lpEsp,ind[k]));
-		printf("valor original do coeficiente em lpEsp: %lf\n", coef[k]);
-		printf("valor do coeficiente retirando de lp: %lf\n", gwValorVariavel(lp, posH1111+i));
-		}
-//*/
-		coef[k] = -1*gwValorVariavel(lp, posH1111+i);
-		lpx_set_mat_row (lpEsp, pos_restricao+i, len, ind, coef);
 
-/*		if (gwValorVariavel(lp,posH1111+i))
+	//Acha a posicao da variavel Bijsd[1,1,1,1] em lpEsp, cujo coeficiente sera alterado
+	sprintf(strB, "Bijsd[%d,%d,%d,%d]", i+1, j+1, k+1, l+1);
+	pos_topologia = lpx_find_col(lpEsp, strB);
+//	if (gwValorVariavel(lp,posHijsd))
+//		printf("Posicao da variavel %s em lpEsp = %d\n", strB, pos_topologia);
+
+	//***Toma valores das variáveis Hijsd de lp e atualiza valor dos coeficientes Hijsd das variáveis Bijsd em lpEsp:***//
+
+	// Busca linha da restricao compval[i,j,s,d] armazenando indices das variaveis e valores dos coeficientes
+	len = lpx_get_mat_row(lpEsp, pos_restricao, ind, coef); //!!!!!!!!!!!!! ISTO ESTA DANDO PAUUUUUU!!!! PORRA!!!!!
+//	if (gwValorVariavel(lp,posHijsd))
+//		printf("%lf x %s %lf x %s = 0\n", coef[1], glp_get_col_name(lpEsp,ind[1]), coef[2], glp_get_col_name(lpEsp,ind[2]));
+	// Busca posicao (m) do coeficiente Hijsd da variavel Bijsd
+	m = 1;
+	while (pos_topologia != ind[m])
+	{
+			m++;
+	}
+
+/*		if (gwValorVariavel(lp,posHijsd))
 		{
-		lpx_get_mat_row (lpEsp, pos_restricao+i, ind, coef);
-		k = 1;
-		while (pos_topologia+i != ind[k])
-			k++;
-		printf(".................ATUALIZOU coeficiente em lpEsp\n");
-		printf("variavel selecionada em lpEsp cujo coeficiente FOI alterado: %s\n", glp_get_col_name(lpEsp,ind[k]));
-		printf("coeficiente da variável selecionada em lpEsp: %lf = %lf\n", coef[k], -1*gwValorVariavel(lp,posH1111+i));
+		printf("variavel selecionada em lpEsp cujo coeficiente sera alterado: %s\n", glp_get_col_name(lpEsp,ind[m]));
+		printf("valor original do coeficiente em lpEsp: %lf\n", coef[m]);
+		printf("valor do coeficiente retirando de lp: %lf\n", gwValorVariavel(lp, posHijsd));
 		}
 */
+		coef[m] = -1*gwValorVariavel(lp, posHijsd);
+		lpx_set_mat_row (lpEsp, pos_restricao, len, ind, coef);
+
+/*		if (gwValorVariavel(lp,posHijsd))
+		{
+		lpx_get_mat_row (lpEsp, pos_restricao, ind, coef);
+		printf(".................ATUALIZOU coeficiente em lpEsp\n");
+		len = lpx_get_mat_row(lpEsp, pos_restricao, ind, coef);
+		printf("%lf x %s %lf x %s = 0\n", coef[1], glp_get_col_name(lpEsp,ind[1]), coef[2], glp_get_col_name(lpEsp,ind[2]));
+		}
+	printf("*********************************************************\n");
+*/
+//	if(ind != NULL)
+//		free(ind);
+//	if(coef != NULL)
+//		free(coef);
 	}
 }
 
-/* Retorn 1 se localizar o enlace menos carregado e 
+/* Retorna 1 se localizar o enlace menos carregado e 
 atribui a linha e a coluna aos parametros linHmin e colHmin, respectivamente */
 //int localizaEnlaceMenosCarregado(int tamRede, Hij *vetHij_hmax,	int *linHmin, int *colHmin)
 int localizaEnlaceMenosCarregado(int tamRede, Hij vetHij_hmax[], Hij hmin)
@@ -117,13 +137,14 @@ int removeEnlaceMenosCarregado(MatSol topologia, Hij vetHij[], Hij hmin)
 /* Iterative Virtual Topology Design para Congestionamento */
 int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 {
-	int tamRede, posB11, posH11, posB11_esp, posH11_esp, sair, iteracao, seccionou1avez;
+	int tamRede, posB11, posH11, posB11_esp, posH11_esp, sair, iteracao, seccionou1avez, i;
 	double valor, lowerBound, grauLogicoMedio, valorFinal;
 	LPGW lp;
 	LPGW lpEsp;
 	MatSol topologia;
 	MatTraf matTraf;
 	Hij *vetHij;
+	Hij *vetHij_Invalido;
 	Hij hmin;
 	
 	lowerBound = 0.0f;
@@ -170,6 +191,7 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 	iteracao = 0;
 	
 	vetHij = ivtdAlocaVetorHij(tamRede*tamRede); // aloca o vetor que guarda os valores de caregamento nos caminhos opticos
+	vetHij_Invalido = ivtdAlocaVetorHij(tamRede*tamRede); // aloca o vetor que guarda os valores de caregamento nos caminhos opticos
 	hmin = ivtdAlocaHij(); // aloca variavel que armazena o carregamento do enlace menos carregado (criterio de retirada de enlaces do ivtd)
 	
 	while(!sair)
@@ -183,6 +205,10 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 		printf("resolve lp\n");
 		valor = gwValorLP(lp); // variavel valor armazena funcao objetivo otimizada
 		printf("Congestionamento da Topologia = %lf\n", valor);
+		
+		//Atualiza o valor de vetHij com os valores de Hij obtidos pela solucao de lp (COM componentes espurios)
+			ivtdAtualizaVetHij(lp, posH11, vetHij_Invalido, tamRede);
+				
 		
 		if(valor < 0) //indica que a topologia foi seccionada pois nao e possivel resolver o LP
 		{
@@ -205,7 +231,7 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 		
 			// elimina componentes espurios
 			printf("Atribuindo componentes de trafego do model MinCong ao modelo Esp...\n");
-			atribuiCompTraf(lp, lpEsp, tamRede); //funcao a ser validada com testes!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			atribuiCompTraf(lp, lpEsp, tamRede);
 
 			printf("Resolvendo lpEsp para retirar componentes espurios...\n");
 			gwValorLP(lpEsp);
@@ -222,7 +248,20 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 			printf("\n");
 			iteracao++;
 			
+/*			printf("Vetor Hij sem atualizar:");
+			for (i=0; i<tamRede*tamRede; i++)
+				printf("%lf;", vetHij[i]->val);
+			printf("\n*****************************\n");
+*/			
+			//Atualiza o valor de vetHij com os valores de Hij obtidos pela solucao de lpEsp (sem componentes espurios)
 			ivtdAtualizaVetHij(lpEsp, posH11_esp, vetHij, tamRede);
+			
+			printf("Vetor Hij INVALIDO-VALIDO:");
+			for (i=0; i<tamRede*tamRede; i++)
+				printf("%lf\t", vetHij_Invalido[i]->val-vetHij[i]->val);
+			printf("\n*****************************\n");
+
+			
 			//seccionou = 0;
 		}
 		
