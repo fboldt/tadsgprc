@@ -18,7 +18,7 @@ set I := 1..N;
 param MatTraf{s in I, d in I};
 
 # 4 - Parcela de tráfego vindo de "s" passando pelo enlace (i,j)
-param Hijsd{i in I, j in I, s in I, d in I} := 1;
+param Hijsd{i in I, j in I, s in I, d in I} := 0;
 
 #############################################################
 ########################### VARIÁVEIS #######################
@@ -44,7 +44,7 @@ var Bnet >=0;
 #############################################################
 
 # 1 - Relaciona variáveis de decisão de componentes de tráfego com as de topologia logica
-s.t.  relbijsdbij{i in I, j in I, s in I, d in I}: Bijsd[i,j,s,d] <= Bij[i,j];
+ s.t.  relbijsdbij{i in I, j in I, s in I, d in I}: Bijsd[i,j,s,d] <= Bij[i,j];
 
 # 2 - Totalizacao do trafego valido
 s.t. defBnet: Bnet = sum {i in I, j in I, s in I, d in I} Bijsd[i,j,s,d];
