@@ -47,6 +47,10 @@ double gwResolveLP(LPGW lp)
 double gwValorVariavel(LPGW lp, int posicao)
 ;
 
+/* Retorna o nome de uma variavel em um lp em determinada posicao */
+const char *gwNomeVariavel(LPGW lp, int posicao)
+;
+
 #endif
 
 

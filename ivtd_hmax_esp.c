@@ -31,19 +31,41 @@ void atribuiCompTraf3(LPGW lp, LPGW lpEsp, int tamRede, double* vetHijsd_esp)
 	// Busca linha da restricao compval[1,1,1,1] armazenando indices das variaveis e valores dos coeficientes
 	len = lpx_get_mat_row(lpEsp, pos_restricao, ind, coef);
 	//Acha a posicao da variavel Bijsd[1,1,1,1] em lpEsp, cujo coeficiente sera alterado
-	pos_topologia = lpx_find_col(lpEsp, "Bijsd[1,1,1,1]");
-
-	// Busca posicao (m) do coeficiente Hijsd da variavel Bijsd
-	m = 1;
-	while (pos_topologia != ind[m])
-	{
-			m++;
-	}
+	pos_topologia = gwPosicaoVariavelLP(lpEsp, "Bijsd[1,1,1,1]");
+	
+	
 	//***Toma valores das variáveis Hijsd de lp e atualiza valor dos coeficientes Hijsd das variáveis Bijsd em lpEsp:***//
 	for(i=0; i<tamRede*tamRede*tamRede*tamRede; i++)
 	{
-		coef[m] = -1*gwValorVariavel(lp, posHijsd+i);
-		lpx_set_mat_row (lpEsp, pos_restricao+i, len, ind, coef);
+		// Busca linha da restricao compval[i,j,s,d] armazenando indices das variaveis e valores dos coeficientes
+		len = lpx_get_mat_row(lpEsp, pos_restricao+i, ind, coef);
+		printf("Numero de elementos nao nulos no vetor de coeficientes ANTES da alteracao: %d\n", len);
+		
+		// Busca posicao (m) do coeficiente Hijsd da variavel Bijsd
+		m = 1;
+		while (pos_topologia+i != ind[m])
+		{
+			m++;
+		}
+	
+		// Imprimir nome da restricao de lpEsp, compVal[i,j,s,d], que sera alterado
+		printf("Nome da restricao de lpEsp, compVal[i,j,s,d], que sera alterado: %s\n", lpx_get_row_name(lpEsp, pos_restricao+i));
+		// Imprimir coeficiente nome da variavel ind[m] cujo coeficiente sera alterado
+		printf("Coeficiente e nome da variavel ind[m] cujo coeficiente sera alterado: %lf * %s\n", coef[m], gwNomeVariavel(lpEsp, ind[m]));
+		
+		coef[m] = gwValorVariavel(lp, posHijsd+i);
+		lpx_set_mat_row(lpEsp, pos_restricao+i, len, ind, coef);
+		
+		//*
+		printf("Nome e valor da varial no lpHmax que sera coeficiente de Bijsd em lpEsp: %s = %lf\n", gwNomeVariavel(lp, ind[m]), coef[m]);
+		
+		// Busca linha da restricao compval[i,j,s,d] armazenando indices das variaveis e valores dos coeficientes
+		len = lpx_get_mat_row(lpEsp, pos_restricao+i, ind, coef);
+		printf("Numero de elementos nao nulos no vetor de coeficientes APOS a alteracao: %d\n", len);
+
+		// Imprimir coeficiente nome da variavel ind[m] cujo coeficiente foi alterado
+		printf("Coeficiente e nome da variavel ind[m] cujo coeficiente foi alterado: %lf * %s\n\n", coef[m], gwNomeVariavel(lpEsp, ind[m]));
+		//*/
 	}
 
 	for(i=0; i<tamRede*tamRede*tamRede*tamRede; i++)
@@ -236,9 +258,10 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 	Hij *vetHij_Invalido;
 	Hij hmin;
 	
-	lowerBound = 0.0f;
+	lowerBound = 0.0;
 	grauLogicoMedio = 0;
 	seccionou1avez = 1;
+	valorFinal = 0;
 
 	//Le modelo LP para minimizacao do congestionamento MinCong
 	
@@ -262,7 +285,7 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 	posH11_esp = gwPosicaoVariavelLP(lpEsp, "Hij[1,1]");
 	posHV1111_esp = gwPosicaoVariavelLP(lpEsp, "HVijsd[1,1,1,1]");
 	posB1111_esp = gwPosicaoVariavelLP(lpEsp, "Bijsd[1,1,1,1]");
-
+	
 	// Funcoes de interpretacao de arquivos de dados associados ao modelo de programacao linear
 	// Finalidade: carregar o tamanho da rede (N) na variavel tamRede
 	matTraf = mtioCarregaMatTraf(dados);
@@ -274,6 +297,46 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 	{	
 		tamRede = mtioLocalizaParametroInt(dados, "N");
 	}
+
+	//Teste para conferir se a posicao das variaveis corresponde ao seu nome e valor
+/*	for (i=0; i<tamRede*tamRede; i++)
+	{
+		printf("i=%d\tposB11=%d\tposBij=%d\tnome=%s\tvalor=%7.2lf\n", 
+		i, posB11, posB11+i, gwNomeVariavel(lp, posB11+i), gwValorVariavel(lp, posB11+i));
+	}
+	for (i=0; i<tamRede*tamRede; i++)
+	{
+		printf("i=%d\tposH11=%d\tposHij=%d\tnome=%s\tvalor=%7.2lf\n", 
+		i, posH11, posH11+i, gwNomeVariavel(lp, posH11+i), gwValorVariavel(lp, posH11+i));
+	}
+	for (i=0; i<tamRede*tamRede; i++)
+	{
+		printf("i=%d\tposB11_esp=%d\tposBij_esp=%d\tnome=%s\tvalor=%7.2lf\n", 
+		i, posB11_esp, posB11_esp+i, gwNomeVariavel(lpEsp, posB11_esp+i), gwValorVariavel(lpEsp, posB11_esp+i));
+	}
+	for (i=0; i<tamRede*tamRede; i++)
+	{
+		printf("i=%d\tposH11_esp=%d\tposHij_esp=%d\tnome=%s\tvalor=%7.2lf\n", 
+		i, posH11_esp, posH11_esp+i, gwNomeVariavel(lpEsp, posH11_esp+i), gwValorVariavel(lpEsp, posH11_esp+i));
+	}
+	for (i=0; i<tamRede*tamRede*tamRede*tamRede; i++)
+	{
+		printf("i=%d\tposH1111=%d\tposHijsd=%d\tnome=%s\tvalor=%7.2lf\n", 
+		i, posH1111, posH1111+i, gwNomeVariavel(lp, posH1111+i), gwValorVariavel(lp, posH1111+i));
+	}
+	for (i=0; i<tamRede*tamRede*tamRede*tamRede; i++)
+	{
+		printf("i=%d\tposHV1111_esp=%d\tposHVijsd_esp=%d\tnome=%s\tvalor=%7.2lf\n", 
+		i, posHV1111_esp, posHV1111_esp+i, gwNomeVariavel(lpEsp, posHV1111_esp+i), gwValorVariavel(lpEsp, posHV1111_esp+i));
+	}
+	for (i=0; i<tamRede*tamRede*tamRede*tamRede; i++)
+	{
+		printf("i=%d\tposB1111_esp=%d\tposBijsd_esp=%d\tnome=%s\tvalor=%7.2lf\n", 
+		i, posB1111_esp, posB1111_esp+i, gwNomeVariavel(lpEsp, posB1111_esp+i), gwValorVariavel(lpEsp, posB1111_esp+i));
+	}
+
+	return 0;
+*/
 	
 	// Inicializa topologia totalmente conexa (iteracao inicial)
 	topologia = msNewMatSol(tamRede);
@@ -306,7 +369,6 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 		
 		//Atualiza o valor de vetHij com os valores de Hij obtidos pela solucao de lp (COM componentes espurios)
 		ivtdAtualizaVetHij(lp, posH11, vetHij_Invalido, tamRede);
-		
 	
 		if(valor < 0) //indica que a topologia foi seccionada pois nao e possivel resolver o LP
 		{
@@ -329,10 +391,77 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 		
 			// elimina componentes espurios
 			printf("Atribuindo componentes de trafego do model MinCong ao modelo Esp...\n");
+			
+			/***** A DOR DE CABECA ESTA AQUI!!!! ******/
+			/**** \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ \/ ****/
 			atribuiCompTraf3(lp, lpEsp, tamRede, vetHijsd_esp);
 
 			printf("Resolvendo lpEsp para retirar componentes espurios...\n");
 			gwResolveLP(lpEsp);
+
+
+	//Teste para conferir se a posicao das variaveis corresponde ao seu nome e valor
+/*	for (i=0; i<tamRede*tamRede; i++)
+	{
+		printf("i=%d\tposB11=%d\tposBij=%d\tnome=%s\tvalor=%7.2lf\n", 
+		i, posB11, posB11+i, gwNomeVariavel(lp, posB11+i), gwValorVariavel(lp, posB11+i));
+	}
+	for (i=0; i<tamRede*tamRede; i++)
+	{
+		printf("i=%d\tposH11=%d\tposHij=%d\tnome=%s\tvalor=%7.2lf\n", 
+		i, posH11, posH11+i, gwNomeVariavel(lp, posH11+i), gwValorVariavel(lp, posH11+i));
+	}
+	for (i=0; i<tamRede*tamRede; i++)
+	{
+		printf("i=%d\tposB11_esp=%d\tposBij_esp=%d\tnome=%s\tvalor=%7.2lf\n", 
+		i, posB11_esp, posB11_esp+i, gwNomeVariavel(lpEsp, posB11_esp+i), gwValorVariavel(lpEsp, posB11_esp+i));
+	}
+	for (i=0; i<tamRede*tamRede; i++)
+	{
+		printf("i=%d\tposH11_esp=%d\tposHij_esp=%d\tnome=%s\tvalor=%7.2lf\n", 
+		i, posH11_esp, posH11_esp+i, gwNomeVariavel(lpEsp, posH11_esp+i), gwValorVariavel(lpEsp, posH11_esp+i));
+	}
+	*/
+	for (i=37; i<38; i++)//i<tamRede*tamRede*tamRede*tamRede; i++)
+	{
+	
+	int lent, pos_restricaot, *indt;
+	double *coeft;
+
+	printf("i=%d\t\t\tposH1111=%d\t\t\tposHijsd=%d\t\t\tnome=%s\t\t\tvalor=%7.2lf\n", 
+	i, posH1111, posH1111+i, gwNomeVariavel(lp, posH1111+i), gwValorVariavel(lp, posH1111+i));
+	printf("i=%d\t\tposHV1111_esp=%d\t\tposHVijsd_esp=%d\t\tnome=%s\tvalor=%7.2lf\n", 
+	i, posHV1111_esp, posHV1111_esp+i, gwNomeVariavel(lpEsp, posHV1111_esp+i), gwValorVariavel(lpEsp, posHV1111_esp+i));
+	printf("i=%d\t\tposB1111_esp=%d\t\tposBijsd_esp=%d\t\tnome=%s\tvalor=%7.2lf\n", 
+	i, posB1111_esp, posB1111_esp+i, gwNomeVariavel(lpEsp, posB1111_esp+i), gwValorVariavel(lpEsp, posB1111_esp+i));
+	// Encontra a posicao da restricao compval[1,2,1,2] que define os componentes de tráfego válidos HVijsd
+	pos_restricaot = lpx_find_row(lpEsp, "compval[1,2,1,2]");
+	// Descobre o numero máximo de coeficientes nao-nulos da restricao compval[1,2,1,2] 
+	lent = lpx_get_mat_row(lpEsp, pos_restricaot, NULL, NULL);
+	// Aloca vetores
+	indt = (int*)    malloc((lent+1)*sizeof(int));
+	coeft = (double*) malloc((lent+1)*sizeof(double));
+	// Busca linha da restricao compval[1,2,1,2] armazenando indices das variaveis e valores dos coeficientes
+	lent = lpx_get_mat_row(lpEsp, pos_restricaot, indt, coeft);
+
+	printf("compval[1,2,1,2]: (%7.2lf) %s - (%7.2lf) * %s <= 0)", coeft[1], gwNomeVariavel(lpEsp, posHV1111_esp+i), 
+	coeft[2], gwNomeVariavel(lpEsp, posB1111_esp+i));
+
+	}
+/*	for (i=0; i<tamRede*tamRede*tamRede*tamRede; i++)
+	{
+		printf("i=%d\tposHV1111_esp=%d\tposHVijsd_esp=%d\tnome=%s\tvalor=%7.2lf\n", 
+		i, posHV1111_esp, posHV1111_esp+i, gwNomeVariavel(lpEsp, posHV1111_esp+i), gwValorVariavel(lpEsp, posHV1111_esp+i));
+	}
+	
+	for (i=0; i<tamRede*tamRede*tamRede*tamRede; i++)
+	{
+		printf("i=%d\tposB1111_esp=%d\tposBijsd_esp=%d\tnome=%s\tvalor=%7.2lf\n", 
+		i, posB1111_esp, posB1111_esp+i, gwNomeVariavel(lpEsp, posB1111_esp+i), gwValorVariavel(lpEsp, posB1111_esp+i));
+	}
+*/
+	return 0;
+
 
 			for (i=0; i<tamRede*tamRede*tamRede*tamRede; i++)
 			{

@@ -65,3 +65,9 @@ double gwValorVariavel(LPGW lp, int posicao)
 	return lpx_get_col_prim(lp,posicao);
 }
 
+/* Retorna o nome de uma variavel em um lp em determinada posicao */
+const char *gwNomeVariavel(LPGW lp, int posicao)
+{
+	return lpx_get_col_name(lp,posicao);
+}
+
