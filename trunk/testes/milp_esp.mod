@@ -18,7 +18,7 @@ set I := 1..N;
 param MatTraf{s in I, d in I};
 
 # 4 - Parcela de tráfego vindo de "s" passando pelo enlace (i,j)
-param Hijsd{i in I, j in I, s in I, d in I} := 0;
+param Hijsd{i in I, j in I, s in I, d in I} := 99999;
 
 #############################################################
 ########################### VARIÁVEIS #######################
@@ -60,7 +60,7 @@ s.t.  conserv2{i in I, s in I, d in I}:
 		else 0));
 
 # 5 - Definição dos componentes de tráfego válidos HVijsd
-s.t.  compval{i in I, j in I, s in I, d in I}: HVijsd[i,j,s,d] - Hijsd[i,j,s,d]*Bijsd[i,j,s,d] <= 0;
+s.t.  compval{i in I, j in I, s in I, d in I}: HVijsd[i,j,s,d] - Hijsd[i,j,s,d]*Bijsd[i,j,s,d] = 0;
 
 #############################################################
 ######################## FUNÇÃO OBJETIVO ####################
