@@ -42,11 +42,10 @@ void atribuiCompTraf(LPGW lp, LPGW lpEsp, int tamRede, double* vetHijsd_esp)
 		
 		// Busca linha da restricao compval[i,j,s,d] armazenando indices das variaveis e valores dos coeficientes
 		len = lpx_get_mat_row(lpEsp, pos_restricao+i, ind, coef);
-		//printf("Numero de elementos nao nulos no vetor de coeficientes ANTES da alteracao: %d\n", len);
-
+		
 		// Busca posicao (m) do coeficiente Hijsd da variavel Bijsd em lpEsp
 		m = 1;
-		while (m<3 && pos_topologia+i != ind[m])
+		while (m<len && pos_topologia+i != ind[m])
 		{
 			m++;
 		}
@@ -183,6 +182,7 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 	
 	while(!sair)
 	{
+		printf("Iteracao: %d\n", iteracao);
 		msImprimeMatSol(topologia);
 		printf("atribui Bij_lp\n");
 		hmaxAtribuiTopologiaBijLP(lp, topologia);
@@ -195,6 +195,7 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 		
 		//Atualiza o valor de vetHij com os valores de Hij obtidos pela solucao de lp (COM componentes espurios)
 		ivtdAtualizaVetHij(lp, posH11, vetHij_Invalido, tamRede);
+		//ivtdAtualizaVetHij(lp, posH11, vetHij, tamRede);
 	
 		if(valor < 0) //indica que a topologia foi seccionada pois nao e possivel resolver o LP
 		{
@@ -214,19 +215,26 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 		{
 			// armazena ultimo valor valido para FO do modelo LP		
 			valorFinal = valor;
-		
+			
+			//* ************ para nao retirar espurios, descomentar esta linha
+			
 			// elimina componentes espurios
 			printf("Atribuindo componentes de trafego do model MinCong ao modelo Esp...\n");
-			
 			atribuiCompTraf(lp, lpEsp, tamRede, vetHijsd_esp);
+			
 			/*
-			glp_write_lp(lpEsp, NULL, "lpesp.lp");
-			exit(1);
+			char filelp[32];
+			sprintf(filelp, "lps/lpesp%d.lp", iteracao);
+			glp_write_lp(lpEsp, NULL, filelp);			
 			//*/
+			
 			printf("Resolvendo lpEsp para retirar componentes espurios...\n");
 			gwResolveLP(lpEsp);
 			
+			//Atualiza o valor de vetHij com os valores de Hij obtidos pela solucao de lpEsp (sem componentes espurios)
+			ivtdAtualizaVetHij(lpEsp, posH11_esp, vetHij, tamRede);
 			
+			//*
 			for (i=0; i<tamRede*tamRede*tamRede*tamRede; i++)
 			{
 				vetHijsd[i] = gwValorVariavel(lp, posH1111+i);
@@ -243,7 +251,7 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 					{
 						for (l=0; l<tamRede; l++)
 						{
-							printf("[%d,%d,%d,%d]: Hijsd = %lf \t Hijsd_esp = %lf \t HVijsd = %lf \t Bijsd = %3.1lf %c \n", 
+							printf("[%d,%d,%d,%d]: Hijsd = %20.16lf \t Hijsd_esp = %20.16lf \t HVijsd = %20.16lf \t Bijsd = %3.1lf %c \n", 
 								i+1, j+1, k+1, l+1, vetHijsd[m],vetHijsd_esp[m],vetHVijsd[m],vetBijsd[m], 
 								vetHVijsd[m]<vetHijsd_esp[m]?'*':vetHVijsd[m]>vetHijsd_esp[m]?'X':' ');
 							m++;
@@ -262,10 +270,6 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 			}
 			//*/
 			printf("\n");
-			iteracao++;
-			
-			//Atualiza o valor de vetHij com os valores de Hij obtidos pela solucao de lpEsp (sem componentes espurios)
-			ivtdAtualizaVetHij(lpEsp, posH11_esp, vetHij, tamRede);
 			
 			printf("Vetor Hij INVALIDO:\n");
 			for (i=0; i<tamRede*tamRede; i++)
@@ -287,6 +291,9 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 				printf("%7.2lf%c", vetHij_Invalido[i]->val-vetHij[i]->val, (i+1)%tamRede==0?'\n':' ');
 			}
 			printf("*****************************\n");
+			
+			//*/
+			iteracao++;
 		}
 		sair = !removeEnlaceMenosCarregado(topologia, vetHij, hmin);
 	}
