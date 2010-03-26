@@ -61,6 +61,7 @@ s.t.  conserv2{i in I, s in I, d in I}:
 
 # 5 - Definição dos componentes de tráfego válidos HVijsd
 s.t.  compval{i in I, j in I, s in I, d in I}: HVijsd[i,j,s,d] - Hijsd[i,j,s,d]*Bijsd[i,j,s,d] = 0;
+s.t.  compval2{i in I, j in I, s in I, d in I}: HVijsd[i,j,s,d] - MatTraf[s,d]*Bij[i,j] <= 0;
 
 #############################################################
 ######################## FUNÇÃO OBJETIVO ####################
