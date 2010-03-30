@@ -1,5 +1,5 @@
 /*
-Formulação do Modelo Agregado MILP
+Formulação do Modelo MILP Desagregado
 - Minimizacao de congestionamento Hmax [Ramaswami, 96]
 - Descrição do modelo em MathProg por Renato Tannure R. de Almeida
 */
@@ -17,56 +17,56 @@ set I := 1..N;
 # 3 - Matriz de Trafego
 param MatTraf{s in I, d in I};
 
-# 4 - Parcela de tráfego vindo de "s" passando pelo enlace (i,j)
-param Hijsd{i in I, j in I, s in I, d in I} := 99999;
-
 #############################################################
 ########################### VARIÁVEIS #######################
 #############################################################
 
 # 1 - Matriz da topologia virtual
-var Bij{i in I, j in I}, binary;
+var  Bij{i in I, j in I}, binary;
 
-# 2 - Variáveis de decisão da Matriz da topologia virtual 
-var Bijsd{i in I, j in I, s in I, d in I}, binary;
+# 2 - Parcela de tráfego vindo de "s" indo para "d" passando pelo enlace (i,j)
+var Hijsd{i in I, j in I, s in I, d in I} >= 0;
 
-# 4 - Componente de tráfego válidos (V) vindo de "s" passando pelo enlace (i,j)
-var HVijsd{i in I, j in I, s in I, d in I} >= 0;
-
-# 5 - Trafego transportado pelo caminho optico que interliga os nós (i,j)
+# 3 - trafego transportado atraves do caminho optico que interliga os nós (i,j)
 var Hij{i in I, j in I } >= 0;
 
-# 6 - Tráfego total sem componentes espúrios 
-var Bnet >=0;
+# 4 - Congestionamento
+var Hmax >=0;
 
 #############################################################
 ########################### RESTRIÇÕES ######################
 #############################################################
 
-# 1 - Relaciona variáveis de decisão de componentes de tráfego com as de topologia logica
- s.t.  relbijsdbij{i in I, j in I, s in I, d in I}: Bijsd[i,j,s,d] <= Bij[i,j];
+# 1 - Restriçao de limitaçao de fluxo
+s.t.  limit{i in I, j in I}: Hmax >= Hij[i,j];
 
-# 2 - Totalizacao do trafego valido
-s.t. defBnet: Bnet = sum {i in I, j in I, s in I, d in I} Bijsd[i,j,s,d];
+# 2 - Restriçao de limitaçao de fluxo tipo 2
+s.t.  limit2{i in I, j in I, s in I, d in I}: (Bij[i,j] * MatTraf[s,d]) - Hijsd[i,j,s,d] >= 0;
 
 # 3 - Restriçao de conservaçao de trafego tipo 1
-s.t.  conserv1{i in I, j in I}: Hij[i,j] = sum{s in I, d in I} HVijsd[i,j,s,d];
+s.t.  conserv1{i in I, j in I}: Hij[i,j] - sum{s in I,d in I} Hijsd[i,j,s,d] = 0;
 
 # 4 - Restriçao de conservaçao de trafego tipo 2
 s.t.  conserv2{i in I, s in I, d in I}: 
-		sum {j in I} HVijsd[i,j,s,d] - sum {j in I} HVijsd[j,i,s,d] = 
+		sum {j in I} Hijsd[i,j,s,d] - sum {j in I} Hijsd[j,i,s,d] = 
 		(if s = i then MatTraf[s,d] 
 		else (if d = i then -MatTraf[s,d]
 		else 0));
-
-# 5 - Definição dos componentes de tráfego válidos HVijsd
-s.t.  compval{i in I, j in I, s in I, d in I}: HVijsd[i,j,s,d] - Hijsd[i,j,s,d]*Bijsd[i,j,s,d] = 0;
+		
+# 5 - Restrição de anulação de componentes Hijsd com s=j e d=i.
+s.t. anul{i in I, j in I, s in I, d in I: s = j, d = i}: Hijsd[i,j,d,s] = 0;
 
 #############################################################
 ######################## FUNÇÃO OBJETIVO ####################
 #############################################################
 
-minimize trafego_total: Bnet;
+minimize congestionamento: Hmax;
+
+solve;
+
+printf '\n# Variaveis Bij\n';
+printf{i in I, j in I}: "param Bij[%s,%s]:= %f;\n", i, j, Bij[i,j];
+printf '\n# Variaveis Hijsd\n';
+printf{i in I, j in I, s in I, d in I}: "param Hijsd[%s,%s,%s,%s]:= %f;\n", i, j, s, d, Hijsd[i,j,s,d];
 
 end;
-
