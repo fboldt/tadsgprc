@@ -15,17 +15,20 @@ param N, integer, > 0;
 set I := 1..N;
 
 # 3 - Matriz de Trafego
-param MatTraf{s in I, d in I};
+param MatTraf{s in I, d in I}, >= 0;
 
 # 4 - Parcela de tráfego vindo de "s" passando pelo enlace (i,j)
-param Hijsd{i in I, j in I, s in I, d in I} := 99999;
+param Hijsd{i in I, j in I, s in I, d in I}, >= 0;
+
+# 5 - Matriz da topologia virtual (versao solver)
+param Bij{i in I, j in I}, binary;
 
 #############################################################
 ########################### VARIÁVEIS #######################
 #############################################################
 
 # 1 - Matriz da topologia virtual
-var Bij{i in I, j in I}, binary;
+#var Bij{i in I, j in I}, binary;
 
 # 2 - Variáveis de decisão da Matriz da topologia virtual 
 var Bijsd{i in I, j in I, s in I, d in I}, binary;
@@ -67,6 +70,10 @@ s.t.  compval{i in I, j in I, s in I, d in I}: HVijsd[i,j,s,d] - Hijsd[i,j,s,d]*
 #############################################################
 
 minimize trafego_total: Bnet;
+
+solve;
+
+printf{i in I, j in I, s in I, d in I}: "HVijsd[%s,%s,%s,%s] - Hijsd[%s,%s,%s,%s] = %f\n", i, j, s, d, i, j, s, d, (HVijsd[i,j,s,d]-Hijsd[i,j,s,d]);
 
 end;
 
