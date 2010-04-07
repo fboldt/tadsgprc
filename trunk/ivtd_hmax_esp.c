@@ -243,17 +243,17 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 			}
 			
 			m=0;
+			for (k=0; k<tamRede; k++)
+					{
+						for (l=0; l<tamRede; l++)
+						{
 			for (i=0; i<tamRede; i++)
 			{
 				for (j=0; j<tamRede; j++)
 				{
-					for (k=0; k<tamRede; k++)
-					{
-						for (l=0; l<tamRede; l++)
-						{
-							printf("[%d,%d,%d,%d]: Hijsd = %20.16lf \t Hijsd_esp = %20.16lf \t HVijsd = %20.16lf \t Bijsd = %3.1lf %c \n", 
-								i+1, j+1, k+1, l+1, vetHijsd[m],vetHijsd_esp[m],vetHVijsd[m],vetBijsd[m], 
-								vetHVijsd[m]<vetHijsd_esp[m]?'*':vetHVijsd[m]>vetHijsd_esp[m]?'X':' ');
+							printf("[%d,%d,%d,%d]: Hijsd = %6.3lf \t Hijsd_esp = %6.3lf \t HVijsd = %6.3lf \t Bijsd = %3.1lf %c \n", 
+								i+1, j+1, k+1, l+1, ceil(vetHijsd[m]*1000)/1000,ceil(vetHijsd_esp[m]*1000)/1000,ceil(vetHVijsd[m]*1000)/1000,vetBijsd[m], 
+								ceil(vetHVijsd[m]*1000)<ceil(vetHijsd_esp[m]*1000)?'*':ceil(vetHVijsd[m]*1000)>ceil(vetHijsd_esp[m]*1000)?'X':' ');
 							m++;
 						}
 					}
