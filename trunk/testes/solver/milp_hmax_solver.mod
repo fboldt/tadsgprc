@@ -54,7 +54,7 @@ s.t.  conserv2{i in I, s in I, d in I}:
 		else 0));
 		
 # 5 - Restrição de anulação de componentes Hijsd com s=j e d=i.
-s.t. anul{i in I, j in I, s in I, d in I: s = j, d = i}: Hijsd[i,j,d,s] = 0;
+#s.t. anul{i in I, j in I, s in I, d in I: s = j, d = i}: Hijsd[i,j,d,s] = 0;
 
 #############################################################
 ######################## FUNÇÃO OBJETIVO ####################
@@ -64,9 +64,52 @@ minimize congestionamento: Hmax;
 
 solve;
 
-printf '\n# Variaveis Bij\n';
-printf{i in I, j in I}: "param Bij[%s,%s]:= %f;\n", i, j, Bij[i,j];
-printf '\n# Variaveis Hijsd\n';
-printf{i in I, j in I, s in I, d in I}: "param Hijsd[%s,%s,%s,%s]:= %f;\n", i, j, s, d, Hijsd[i,j,s,d];
+
+printf '\nparam N := %s;\n', N;
+printf '\nparam MatTraf :';
+printf{i in I}: " %14s", i;
+printf " := \n";
+for{i in I} {
+	printf "%14s ", i;
+	for{j in I} {
+		printf "%15s", MatTraf[i,j];
+	}
+	printf "\n";
+}
+printf ";\n";
+
+printf '\nparam Bij :';
+printf{i in I}: " %s", i;
+printf " := \n";
+for{i in I} {
+	printf " %9s ", i;
+	for{j in I} {
+		printf " %s", Bij[i,j];
+	}
+	printf "\n";
+}
+printf ";\n";
+
+printf 'param Hijsd :=\n';
+for{k in I} {
+	for{l in I} {
+		printf "##########################################\n[*,*,%s,%s]:", k, l;
+		printf{i in I}: " %20s", i;
+		printf " :=\n";
+		for{i in I} {
+			printf "%10s", i;
+			for{j in I} {
+				printf " %20s", Hijsd[i,j,k,l];
+			}
+			printf "\n";
+		}
+	}
+}
+printf ";\nend;\n";
+
+#printf '\n# Variaveis Bij\n';
+#printf{i in I, j in I}: "param Bij[%s,%s]:= %f;\n", i, j, Bij[i,j];
+#printf '\n# Variaveis Hijsd\n';
+#printf{i in I, j in I, s in I, d in I}: "param Hijsd[%s,%s,%s,%s]:= %f;\n", i, j, s, d, Hijsd[i,j,s,d];
 
 end;
