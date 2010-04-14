@@ -60,3 +60,4 @@ s.t.  conserv2{i in I, s in I, d in I}:
 minimize congestionamento: Hmax;
 
 end;
+
