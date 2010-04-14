@@ -16,13 +16,15 @@
 //Atualiza o valor da variavel Hijsd de lp no coeficiente Hijsd*Bijsd das restricoes compval de lpEsp
 void atribuiCompTraf(LPGW lp, LPGW lpEsp, int tamRede, double* vetHijsd_esp)
 {
-	int i, j, m, posHijsd, len, pos_restricao, pos_topologia, *ind;
+	int i, j, posHijsd, pos_restricao, pos_topologia, *ind, posHVijsd;
 	double *coef;
 	
 	//Encontrar a posicao da variavel Hijsd[1,1,1,1] em lp
 	posHijsd = gwPosicaoVariavelLP(lp, "Hijsd[1,1,1,1]");
 	// Encontra a posicao da restricao compval[1,1,1,1] que define os componentes de tráfego válidos HVijsd
 	pos_restricao = lpx_find_row(lpEsp, "compval[1,1,1,1]");
+	
+	posHVijsd = gwPosicaoVariavelLP(lpEsp, "HVijsd[1,1,1,1]");
 	
 	// Aloca vetores para lpEsp
 	ind = (int*) malloc((3)*sizeof(int));
@@ -39,21 +41,14 @@ void atribuiCompTraf(LPGW lp, LPGW lpEsp, int tamRede, double* vetHijsd_esp)
 			ind[j] = 0;
 			coef[j] = 0.0;
 		}
+		ind[1] = posHVijsd+i;
+		ind[2] = pos_topologia+i;
+		coef[1] = 1;
+		coef[2] = gwValorVariavel(lp, posHijsd+i);
 		
-		// Busca linha da restricao compval[i,j,s,d] armazenando indices das variaveis e valores dos coeficientes
-		len = lpx_get_mat_row(lpEsp, pos_restricao+i, ind, coef);
-		
-		// Busca posicao (m) do coeficiente Hijsd da variavel Bijsd em lpEsp
-		m = 1;
-		while (m<len && pos_topologia+i != ind[m])
-		{
-			m++;
-		}
-		
-		coef[m] = gwValorVariavel(lp, posHijsd+i);
-		vetHijsd_esp[i] = coef[m];
-		coef[m] *= -1;
-		lpx_set_mat_row(lpEsp, pos_restricao+i, len, ind, coef);
+		vetHijsd_esp[i] = coef[2];
+		coef[2] *= -1;
+		lpx_set_mat_row(lpEsp, pos_restricao+i, 1+(coef[2]!=0), ind, coef);
 	}
 		
 	// Libera vetores ind e coef
@@ -109,11 +104,92 @@ int removeEnlaceMenosCarregado(MatSol topologia, Hij vetHij[], Hij hmin)
 	return removeu;
 }
 
+void imprimeListaComponentesDeTrafego(double vetHVijsd[], double vetHijsd_esp[], double vetHijsd[], double vetBijsd[], int tamRede)
+{
+	int i, j, k, l, m;
+	m=0;
+	for (k=0; k<tamRede; k++)
+			{
+				for (l=0; l<tamRede; l++)
+				{
+	for (i=0; i<tamRede; i++)
+	{
+		for (j=0; j<tamRede; j++)
+		{
+					if(vetHVijsd[m]!=vetHijsd_esp[m])
+					printf("[%d,%d,%d,%d]: Hijsd = %6.3lf \t Hijsd_esp = %6.3lf \t HVijsd = %6.3lf \t Bijsd = %3.1lf %c \n", 
+						i+1, j+1, k+1, l+1, ceil(vetHijsd[m]*1000)/1000,ceil(vetHijsd_esp[m]*1000)/1000,ceil(vetHVijsd[m]*1000)/1000,vetBijsd[m], ceil(vetHVijsd[m]*1000)<ceil(vetHijsd_esp[m]*1000)?'*':ceil(vetHVijsd[m]*1000)>ceil(vetHijsd_esp[m]*1000)?'X':' ');
+					m++;
+				}
+			}
+		}
+	}
+}
+
+void imprimeMatrizComponentesDeTrafego(double vetHVijsd[], double vetHijsd[], double vetBijsd[], int tamRede)
+{
+	int i, j, k, l, m, n;
+	n = 0;
+	for (k=0; k<tamRede; k++)
+	{
+		for (l=0; l<tamRede; l++)
+		{
+			printf("\nHijsd[*,*,%d,%d]:\n", k, l);
+			for (m=0; m<tamRede; m++)
+			{
+				printf(" %20d", m);
+			}
+			printf("\n");
+			for (i=0; i<tamRede; i++)
+			{
+				for (j=0; j<tamRede; j++)
+				{
+					printf(" %20lf", vetHijsd[i*tamRede*tamRede*tamRede+j*tamRede*tamRede+k*tamRede+l]);
+					n++;
+				}
+				printf("\n");
+			}
+			n -= tamRede*tamRede;
+			printf("\nHVijsd[*,*,%d,%d]:\n", k, l);
+			for (m=0; m<tamRede; m++)
+			{
+				printf(" %20d", m);
+			}
+			printf("\n");
+			for (i=0; i<tamRede; i++)
+			{
+				for (j=0; j<tamRede; j++)
+				{
+					printf(" %20f", vetHVijsd[i*tamRede*tamRede*tamRede+j*tamRede*tamRede+k*tamRede+l]);
+					n++;
+				}
+				printf("\n");
+			}
+			n -= tamRede*tamRede;
+			printf("\nBijsd[*,*,%d,%d]:\n", k, l);
+			for (m=0; m<tamRede; m++)
+			{
+				printf(" %20d", m);
+			}
+			printf("\n");
+			for (i=0; i<tamRede; i++)
+			{
+				for (j=0; j<tamRede; j++)
+				{
+					printf(" %20f", vetBijsd[i*tamRede*tamRede*tamRede+j*tamRede*tamRede+k*tamRede+l]);
+					n++;
+				}
+				printf("\n");
+			}
+		}
+	}
+}
+
 /* Iterative Virtual Topology Design para Congestionamento */
 int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 {
 	int tamRede, posB11, posH11, posB11_esp, posH11_esp, sair, iteracao, seccionou1avez;
-	int i, j, k, l, m, posB1111_esp, posHV1111_esp, posH1111;
+	int i, posB1111_esp, posHV1111_esp, posH1111;
 	double valor, lowerBound, grauLogicoMedio, valorFinal, *vetHijsd, *vetHijsd_esp, *vetHVijsd, *vetBijsd;
 	LPGW lp;
 	LPGW lpEsp;
@@ -242,24 +318,6 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 				vetBijsd[i] = gwValorVariavel(lpEsp, posB1111_esp+i);
 			}
 			
-			m=0;
-			for (k=0; k<tamRede; k++)
-					{
-						for (l=0; l<tamRede; l++)
-						{
-			for (i=0; i<tamRede; i++)
-			{
-				for (j=0; j<tamRede; j++)
-				{
-							printf("[%d,%d,%d,%d]: Hijsd = %6.3lf \t Hijsd_esp = %6.3lf \t HVijsd = %6.3lf \t Bijsd = %3.1lf %c \n", 
-								i+1, j+1, k+1, l+1, ceil(vetHijsd[m]*1000)/1000,ceil(vetHijsd_esp[m]*1000)/1000,ceil(vetHVijsd[m]*1000)/1000,vetBijsd[m], 
-								ceil(vetHVijsd[m]*1000)<ceil(vetHijsd_esp[m]*1000)?'*':ceil(vetHVijsd[m]*1000)>ceil(vetHijsd_esp[m]*1000)?'X':' ');
-							m++;
-						}
-					}
-				}
-			}
-
 			printf("Iteracao: %d - Congestionamento: %lf - num.enlaces: %d", iteracao, valor, tamRede*(tamRede-1)-iteracao);
 			/* Para imprimir o lower bound e o grau logico medio comente esta linha
 			if(matTraf != NULL)
@@ -288,9 +346,11 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 			printf("Vetor Hij INVALIDO-VALIDO:\n");
 			for (i=0; i<tamRede*tamRede; i++)
 			{
-				printf("%7.2lf%c", vetHij_Invalido[i]->val-vetHij[i]->val, (i+1)%tamRede==0?'\n':' ');
+				printf("%20.17lf%c", vetHij_Invalido[i]->val-vetHij[i]->val, (i+1)%tamRede==0?'\n':' ');
 			}
 			printf("*****************************\n");
+			//imprimeListaComponentesDeTrafego(vetHVijsd, vetHijsd_esp, vetHijsd, vetBijsd, tamRede);
+			imprimeMatrizComponentesDeTrafego(vetHVijsd, vetHijsd, vetBijsd, tamRede);
 			
 			//*/
 			iteracao++;

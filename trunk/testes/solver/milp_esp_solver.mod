@@ -73,7 +73,7 @@ minimize trafego_total: Bnet;
 
 solve;
 
-printf{i in I, j in I, s in I, d in I}: "HVijsd[%s,%s,%s,%s] - Hijsd[%s,%s,%s,%s] = %f\n", i, j, s, d, i, j, s, d, (HVijsd[i,j,s,d]-Hijsd[i,j,s,d]);
+printf{i in I, j in I, s in I, d in I}: if HVijsd[i,j,s,d] = Hijsd[i,j,s,d] then "" else "HVijsd[%s,%s,%s,%s] - Hijsd[%s,%s,%s,%s] = %f\n", i, j, s, d, i, j, s, d, HVijsd[i,j,s,d]-Hijsd[i,j,s,d];
 
 end;
 
