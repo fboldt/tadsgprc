@@ -99,7 +99,7 @@ int removeEnlaceMenosCarregado(MatSol topologia, Hij vetHij[], Hij hmin)
 	{
 		msDecrementaMatSol(topologia, hmin->lin, hmin->col);
 		removeu = 1;
-		printf("Removeu enlace hmin[%d,%d]=%lf\n", hmin->lin, hmin->col, hmin->val);
+		//printf("Removeu enlace hmin[%d,%d]=%lf\n", hmin->lin, hmin->col, hmin->val);
 	}
 	return removeu;
 }
@@ -198,6 +198,13 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 	Hij *vetHij;
 	Hij *vetHij_Invalido;
 	Hij hmin;
+	FILE *fespurio, *fespreadiciona;
+	char nomefespurio[256], nomefespreadiciona[256];
+	
+	sprintf(nomefespurio, "%s.espurio", dados);
+	fespurio = fopen(nomefespurio, "w+");
+	sprintf(nomefespreadiciona, "%s.espreadiciona", dados);
+	fespreadiciona = fopen(nomefespreadiciona, "w+");
 	
 	lowerBound = 0.0;
 	grauLogicoMedio = 0;
@@ -258,16 +265,18 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 	
 	while(!sair)
 	{
+		/*
 		printf("Iteracao: %d\n", iteracao);
 		msImprimeMatSol(topologia);
-		printf("atribui Bij_lp\n");
+		//*/
+		//printf("atribui Bij_lp\n");
 		hmaxAtribuiTopologiaBijLP(lp, topologia);
-		printf("atribui Bij_lpEsp\n");
+		//printf("atribui Bij_lpEsp\n");
 		hmaxAtribuiTopologiaBijLP(lpEsp, topologia);
 
-		printf("resolve lp\n");
+		//printf("resolve lp\n");
 		valor = gwResolveLP(lp); // variavel valor armazena funcao objetivo otimizada
-		printf("Congestionamento da Topologia = %lf\n", valor);
+		//printf("Congestionamento da Topologia = %lf\n", valor);
 		
 		//Atualiza o valor de vetHij com os valores de Hij obtidos pela solucao de lp (COM componentes espurios)
 		ivtdAtualizaVetHij(lp, posH11, vetHij_Invalido, tamRede);
@@ -277,13 +286,13 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 		{
 			//readiciona enlace
 			msAdicionaEnlace(topologia, hmin->lin, hmin->col);
-			printf("Seccionou a rede e readicionou o enlace b[%d,%d]\n", hmin->lin, hmin->col);
+			//printf("Seccionou a rede e readicionou o enlace b[%d,%d]\n", hmin->lin, hmin->col);
 			
 			//indica a primeira vez que a topologia foi seccionada, que e o resultado de ivtd_hmax segundo Karcius D. R. Assis
 			if(seccionou1avez)
 			{
-				printf("Solucao do IVTD original:\nCongestionamento: %lf\nTopologia:\n", valorFinal);
-				msImprimeMatSol(topologia);
+				//printf("Solucao do IVTD original:\nCongestionamento: %lf\nTopologia:\n", valorFinal);
+				//msImprimeMatSol(topologia);
 				seccionou1avez = 0;
 			}
 		}
@@ -295,16 +304,10 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 			//* ************ para nao retirar espurios, descomentar esta linha
 			
 			// elimina componentes espurios
-			printf("Atribuindo componentes de trafego do model MinCong ao modelo Esp...\n");
+			//printf("Atribuindo componentes de trafego do model MinCong ao modelo Esp...\n");
 			atribuiCompTraf(lp, lpEsp, tamRede, vetHijsd_esp);
 			
-			/*
-			char filelp[32];
-			sprintf(filelp, "lps/lpesp%d.lp", iteracao);
-			glp_write_lp(lpEsp, NULL, filelp);			
-			//*/
-			
-			printf("Resolvendo lpEsp para retirar componentes espurios...\n");
+			//printf("Resolvendo lpEsp para retirar componentes espurios...\n");
 			gwResolveLP(lpEsp);
 			
 			//Atualiza o valor de vetHij com os valores de Hij obtidos pela solucao de lpEsp (sem componentes espurios)
@@ -318,7 +321,7 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 				vetBijsd[i] = gwValorVariavel(lpEsp, posB1111_esp+i);
 			}
 			
-			printf("Iteracao: %d - Congestionamento: %lf - num.enlaces: %d", iteracao, valor, tamRede*(tamRede-1)-iteracao);
+			//printf("Iteracao: %d - Congestionamento: %lf - num.enlaces: %d", iteracao, valor, tamRede*(tamRede-1)-iteracao);
 			/* Para imprimir o lower bound e o grau logico medio comente esta linha
 			if(matTraf != NULL)
 			{
@@ -327,8 +330,8 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 				printf(" - LowerBound: %lf - grauLogicoMedio: %f", lowerBound, grauLogicoMedio);
 			}
 			//*/
-			printf("\n");
-			
+			//printf("\n");
+			/*
 			printf("Vetor Hij INVALIDO:\n");
 			for (i=0; i<tamRede*tamRede; i++)
 			{
@@ -349,17 +352,26 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 				printf("%20.17lf%c", vetHij_Invalido[i]->val-vetHij[i]->val, (i+1)%tamRede==0?'\n':' ');
 			}
 			printf("*****************************\n");
+			//*/
 			//imprimeListaComponentesDeTrafego(vetHVijsd, vetHijsd_esp, vetHijsd, vetBijsd, tamRede);
-			imprimeMatrizComponentesDeTrafego(vetHVijsd, vetHijsd, vetBijsd, tamRede);
+			//imprimeMatrizComponentesDeTrafego(vetHVijsd, vetHijsd, vetBijsd, tamRede);
 			
 			//*/
+			fprintf(fespreadiciona, "%lf, ", valor);
+			if(seccionou1avez)
+			{
+				fprintf(fespurio, "%lf, ", valor);
+			}
 			iteracao++;
 		}
 		sair = !removeEnlaceMenosCarregado(topologia, vetHij, hmin);
 	}
 	
-	printf("Congestionamento: %lf\nTopologia final:\n", valorFinal);
-	msImprimeMatSol(topologia);
+	//printf("Congestionamento: %lf\nTopologia final:\n", valorFinal);
+	//msImprimeMatSol(topologia);
+	
+	fclose(fespurio);
+	fclose(fespreadiciona);
 	
 	ivtdLiberaVetorHij(tamRede*tamRede, vetHij);
 	ivtdLiberaHij(hmin);
