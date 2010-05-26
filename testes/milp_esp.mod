@@ -15,7 +15,7 @@ param N, integer, > 0;
 set I := 1..N;
 
 # 3 - Matriz de Trafego
-param MatTraf{s in I, d in I}, >= 0;
+param mattraf{s in I, d in I}, >= 0;
 
 # 4 - Parcela de tráfego vindo de "s" passando pelo enlace (i,j)
 param Hijsd{i in I, j in I, s in I, d in I} := 0;
@@ -55,8 +55,8 @@ s.t.  conserv1{i in I, j in I}: Hij[i,j] = sum{s in I, d in I} HVijsd[i,j,s,d];
 # 4 - Restriçao de conservaçao de trafego tipo 2
 s.t.  conserv2{i in I, s in I, d in I}: 
 		sum {j in I} HVijsd[i,j,s,d] - sum {j in I} HVijsd[j,i,s,d] = 
-		(if s = i then MatTraf[s,d] 
-		else (if d = i then -MatTraf[s,d]
+		(if s = i then mattraf[s,d] 
+		else (if d = i then -mattraf[s,d]
 		else 0));
 
 # 5 - Definição dos componentes de tráfego válidos HVijsd

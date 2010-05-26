@@ -74,8 +74,10 @@ int ivtd_hmax_original(char *modelo, char *dados)
 	
 	sprintf(nomeforiginal, "%s.original", dados);
 	foriginal = fopen(nomeforiginal, "w+");
+	fprintf(foriginal, "hmax "); 
 	sprintf(nomefreadiciona, "%s.readiciona", dados);
 	freadiciona = fopen(nomefreadiciona, "w+");
+	fprintf(freadiciona, "hmax "); 
 	
 	lowerBound = 0.0;
 	grauLogicoMedio = 0;
@@ -157,10 +159,10 @@ int ivtd_hmax_original(char *modelo, char *dados)
 			
 			//printf("Iteracao: %d - Congestionamento: %lf - num.enlaces: %d", iteracao, valor, tamRede*(tamRede-1)-iteracao);
 			//printf("%lf, ", valor);
-			fprintf(freadiciona, "%lf, ", valor);
+			fprintf(freadiciona, "%lf ", valor);
 			if(seccionou1avez)
 			{
-				fprintf(foriginal, "%lf, ", valor);
+				fprintf(foriginal, "%lf ", valor);
 			}
 			/* Para imprimir o lower bound e o grau logico medio comente esta linha
 			if(matTraf != NULL)
@@ -179,7 +181,8 @@ int ivtd_hmax_original(char *modelo, char *dados)
 	
 	//printf("Congestionamento: %lf\nTopologia final:\n", valorFinal);
 	//msImprimeMatSol(topologia);
-	
+	fprintf(freadiciona, "\n");
+	fprintf(foriginal, "\n");
 	fclose(foriginal);
 	fclose(freadiciona);
 	
