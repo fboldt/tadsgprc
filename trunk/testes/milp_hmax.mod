@@ -15,7 +15,7 @@ param N, integer, > 0;
 set I := 1..N;
 
 # 3 - Matriz de Trafego
-param MatTraf{s in I, d in I};
+param mattraf{s in I, d in I};
 
 #############################################################
 ########################### VARIÁVEIS #######################
@@ -41,7 +41,7 @@ var Hmax >=0;
 s.t.  limit{i in I, j in I}: Hmax >= Hij[i,j];
 
 # 2 - Restriçao de limitaçao de fluxo tipo 2
-s.t.  limit2{i in I, j in I, s in I, d in I}: (Bij[i,j] * MatTraf[s,d]) - Hijsd[i,j,s,d] >= 0;
+s.t.  limit2{i in I, j in I, s in I, d in I}: (Bij[i,j] * mattraf[s,d]) - Hijsd[i,j,s,d] >= 0;
 
 # 3 - Restriçao de conservaçao de trafego tipo 1
 s.t.  conserv1{i in I, j in I}: Hij[i,j] - sum{s in I,d in I} Hijsd[i,j,s,d] = 0;
@@ -49,8 +49,8 @@ s.t.  conserv1{i in I, j in I}: Hij[i,j] - sum{s in I,d in I} Hijsd[i,j,s,d] = 0
 # 4 - Restriçao de conservaçao de trafego tipo 2
 s.t.  conserv2{i in I, s in I, d in I}: 
 		sum {j in I} Hijsd[i,j,s,d] - sum {j in I} Hijsd[j,i,s,d] = 
-		(if s = i then MatTraf[s,d] 
-		else (if d = i then -MatTraf[s,d]
+		(if s = i then mattraf[s,d] 
+		else (if d = i then -mattraf[s,d]
 		else 0));
 
 #############################################################

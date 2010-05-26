@@ -29,7 +29,7 @@ void gmtDelConfigGeraMatTraf(ConfigGeraMatTraf conf)
 void gmtGeraDistribuicao(ConfigMatTraf confMat, ConfigGeraMatTraf conf)
 {
 	MatTraf *vetMT, *vetInterv;
-	char nome[128], tipoDist[128];
+	char nome[128], nomeDir[128], tipoDist[128];
 	int i;
 	/*Cria diretorio especificado se nao existir*/
 	gmtCriaDiretorio(conf->diretorio);
@@ -43,10 +43,18 @@ void gmtGeraDistribuicao(ConfigMatTraf confMat, ConfigGeraMatTraf conf)
 		case SN: sprintf(tipoDist, "SN%.0f", (confMat->porcentagemDistribuicao*100));
 				 break;
 	}
+	/*Formata o nome do subdiretorio para os arquivos que serao gravados com as MatTraf*/
+	sprintf(nomeDir, "%s/N%d", conf->diretorio, confMat->ordem);
+	/*Cria diretorio especificado se nao existir*/
+	gmtCriaDiretorio(nomeDir);
+	/*Formata o nome do subdiretorio para os arquivos que serao gravados com as MatTraf*/
+	sprintf(nomeDir, "%s/N%d/%s", conf->diretorio, confMat->ordem, tipoDist);
+	/*Cria diretorio especificado se nao existir*/
+	gmtCriaDiretorio(nomeDir);
 	/*Cria um vetor de instancias de MatTraf com as configuracoes de confMat*/
 	vetMT  = mtCriaInstancias(confMat, conf->quantInstance);
 	/*Formata o nomeBase para os arquivos que serao gravados com as MatTraf*/
-	sprintf(nome, "%s/%s_N%d_%s_p", conf->diretorio, conf->fileConf, confMat->ordem, tipoDist);
+	sprintf(nome, "%s/%s_N%d_%s_p", nomeDir, conf->fileConf, confMat->ordem, tipoDist);
 	/*Grava arquivos da MatTraf contidas no vetor de Mattrafs vetMT*/
 	mtioGravaVetMatTraf(nome, conf->quantInstance, vetMT, conf->param);
 	for(i = 0; i < conf->quantInstance -1; i++)
@@ -54,7 +62,7 @@ void gmtGeraDistribuicao(ConfigMatTraf confMat, ConfigGeraMatTraf conf)
 		/*Cria um vetor de instancias de MatTraf com demandas de duas MatTrafs interpoladas*/
 		vetInterv = mtVetMatTrafIntervalar(vetMT[i], vetMT[i+1], conf->intervalo);
 		/*Formata o nomeBase para as MatTrafs interpoladas*/
-		sprintf(nome, "%s/%s_N%d_%s_p%d_i", conf->diretorio, conf->fileConf, confMat->ordem, tipoDist, i+1);
+		sprintf(nome, "%s/%s_N%d_%s_p%d_i", nomeDir, conf->fileConf, confMat->ordem, tipoDist, i+1);
 		/*Grava arquivos da MatTraf contidas no vetor de Mattrafs intervalares vetInterv*/
 		mtioGravaVetMatTraf(nome, conf->intervalo, vetInterv, conf->param);
 		/*Libera o vetor de MatTrafs intervalaras vetInterv*/

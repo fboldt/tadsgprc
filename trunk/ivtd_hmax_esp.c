@@ -203,8 +203,10 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 	
 	sprintf(nomefespurio, "%s.espurio", dados);
 	fespurio = fopen(nomefespurio, "w+");
+	fprintf(fespurio, "hmax "); 
 	sprintf(nomefespreadiciona, "%s.espreadiciona", dados);
 	fespreadiciona = fopen(nomefespreadiciona, "w+");
+	fprintf(fespreadiciona, "hmax "); 
 	
 	lowerBound = 0.0;
 	grauLogicoMedio = 0;
@@ -357,10 +359,10 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 			//imprimeMatrizComponentesDeTrafego(vetHVijsd, vetHijsd, vetBijsd, tamRede);
 			
 			//*/
-			fprintf(fespreadiciona, "%lf, ", valor);
+			fprintf(fespreadiciona, "%lf ", valor);
 			if(seccionou1avez)
 			{
-				fprintf(fespurio, "%lf, ", valor);
+				fprintf(fespurio, "%lf ", valor);
 			}
 			iteracao++;
 		}
@@ -369,7 +371,8 @@ int ivtd_hmax_esp(char *modelo, char *modeloEsp, char *dados)
 	
 	//printf("Congestionamento: %lf\nTopologia final:\n", valorFinal);
 	//msImprimeMatSol(topologia);
-	
+	fprintf(fespreadiciona, "\n");
+	fprintf(fespurio, "\n");
 	fclose(fespurio);
 	fclose(fespreadiciona);
 	
