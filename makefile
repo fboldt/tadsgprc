@@ -25,5 +25,11 @@ ivtd_hmax_esp:
 ivtd_hmax_original:
 	gcc matsol.c glpkwrapper.c ivtd.c toolkit.c mattraf.c ivtd_hmax_original.c -o ivtd_hmax_original.bin -Wall -lglpk -lm
 	
+ivtd_ftnet_original:
+	gcc matsol.c glpkwrapper.c ivtd.c toolkit.c mattraf.c ivtd_ftnet_original.c -o ivtd_ftnet_original.bin -Wall -lglpk -lm
+
+ivtd_ftnet_esp:
+	gcc matsol.c glpkwrapper.c ivtd.c toolkit.c mattraf.c ivtd_ftnet_esp.c -o ivtd_ftnet_esp.bin -Wall -lglpk -lm
+
 segatto:
 	gcc segatto.c glpkwrapper.c toolkit.c matsol.c mattraf.c -o segatto.bin -Wall -lglpk
