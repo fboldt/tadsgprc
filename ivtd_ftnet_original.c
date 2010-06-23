@@ -43,6 +43,23 @@ int localizaEnlaceMenosCarregado(int tamRede, Hij vetHij_hmax[], Hij hmin)
 	return achou;
 }
 
+double valorEnlaceMaisCarregado(int tamRede, Hij vetHij_hmax[])
+{
+	int k, indice_maior;
+	double maior;
+	indice_maior = -1;
+	maior = -FLT_MAX;
+	for(k=0; k<(tamRede*tamRede); k++)
+	{
+		if (vetHij_hmax[k]->val > maior)
+		{
+			indice_maior = k;
+			maior = vetHij_hmax[k]->val;
+		}
+	}
+	return maior;
+}
+
 /* Retorna 1 se remover o enlace menos carregado da topologia */
 int removeEnlaceMenosCarregado(MatSol topologia, Hij vetHij[], Hij hmin)
 {
@@ -69,15 +86,20 @@ int ivtd_ftnet_original(char *modelo, char *dados)
 	MatTraf matTraf;
 	Hij *vetHij;
 	Hij hmin;
-	FILE *foriginal, *freadiciona;
-	char nomeforiginal[256], nomefreadiciona[256];
+	FILE *foriginal, *freadiciona, *fhmax;
+	char nomeforiginal[256], nomefreadiciona[256], nomefhmax[256];
 	
 	sprintf(nomeforiginal, "%s.original", dados);
 	foriginal = fopen(nomeforiginal, "w+");
 	fprintf(foriginal, "ftnet "); 
+	
 	sprintf(nomefreadiciona, "%s.readiciona", dados);
 	freadiciona = fopen(nomefreadiciona, "w+");
 	fprintf(freadiciona, "ftnet "); 
+	
+	sprintf(nomefhmax, "%s.hmax", dados);
+	fhmax = fopen(nomefhmax, "w+");
+	fprintf(fhmax, "hmax "); 
 	
 	lowerBound = 0.0;
 	grauLogicoMedio = 0;
@@ -155,6 +177,7 @@ int ivtd_ftnet_original(char *modelo, char *dados)
 		{
 			// armazena ultimo valor valido para FO do modelo LP		
 			valorFinal = valor;
+			fprintf(fhmax, "%lf ", valorEnlaceMaisCarregado(tamRede, vetHij));
 			
 			//printf("Iteracao: %d - Processamento: %lf - num.enlaces: %d", iteracao, valor, tamRede*(tamRede-1)-iteracao);
 			//printf("%lf, ", valor);
@@ -181,9 +204,11 @@ int ivtd_ftnet_original(char *modelo, char *dados)
 	//printf("Processamento: %lf\nTopologia final:\n", valorFinal);
 	//msImprimeMatSol(topologia);
 	fprintf(freadiciona, "\n");
+	fclose(freadiciona);
 	fprintf(foriginal, "\n");
 	fclose(foriginal);
-	fclose(freadiciona);
+	fprintf(fhmax, "\n");
+	fclose(fhmax);
 	
 	ivtdLiberaVetorHij(tamRede*tamRede, vetHij);
 	ivtdLiberaHij(hmin);
