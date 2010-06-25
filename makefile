@@ -28,6 +28,12 @@ ivtd_hmax_original:
 ivtd_ftnet_original:
 	gcc matsol.c glpkwrapper.c ivtd.c toolkit.c mattraf.c ivtd_ftnet_original.c -o ivtd_ftnet_original.bin -Wall -lglpk -lm
 
+rhdla:
+	gcc matsol.c glpkwrapper.c ivtd.c toolkit.c mattraf.c rhlda.c -o rhlda.bin -Wall -lglpk -lm
+
+rdla:
+	gcc matsol.c glpkwrapper.c ivtd.c toolkit.c mattraf.c rlda.c -o rlda.bin -Wall -lglpk -lm
+
 ivtd_ftnet_esp:
 	gcc matsol.c glpkwrapper.c ivtd.c toolkit.c mattraf.c ivtd_ftnet_esp.c -o ivtd_ftnet_esp.bin -Wall -lglpk -lm
 
