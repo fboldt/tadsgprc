@@ -138,20 +138,23 @@ int rhlda(char *modelo, char *dados)
 	while(!sair)
 	{
 		/*
-		printf("Iteracao: %d\n", iteracao);
+		printf("topologia: %d\n", iteracao);
 		msImprimeMatSol(topologia);
+		printf("retirados: %d\n", iteracao);
+		msImprimeMatSol(retirados);
+		
 		//*/
 		//printf("atribui Bij_lp\n");
 		milpAtribuiTopologiaBijLP(lp, topologia);
 	
 		//printf("resolve lp\n");
 		valor = gwResolveLP(lp); // variavel valor armazena funcao objetivo otimizada
-		//printf("Processamento = %lf\n", valor);
+		//printf("Processamento = %.60lf\n", valor);
 		
 		//Atualiza o valor de vetHij com os valores de Hij obtidos pela solucao de lp (COM componentes espurios)
 		ivtdAtualizaVetHij(lp, posH11, vetHij, tamRede);
 	
-		if(valor < 0) //indica que a topologia foi seccionada pois nao e possivel resolver o LP
+		if(valor == -1) //indica que a topologia foi seccionada pois nao e possivel resolver o LP
 		{
 			//readiciona enlace
 			msAdicionaEnlace(topologia, hmin->lin, hmin->col);
@@ -171,7 +174,7 @@ int rhlda(char *modelo, char *dados)
 			valorFinal = valor;
 			fprintf(fhmax, "%lf ", valorEnlaceMaisCarregado(tamRede, vetHij));
 			
-			//printf("Iteracao: %d - Processamento: %lf - num.enlaces: %d", iteracao, valor, tamRede*(tamRede-1)-iteracao);
+			printf("Iteracao: %d - Processamento: %lf - num.enlaces: %d\n", iteracao, valor, tamRede*(tamRede-1)-iteracao);
 			//printf("%lf, ", valor);
 			fprintf(freadiciona, "%lf ", valor);
 			if(seccionou1avez)
