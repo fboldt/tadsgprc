@@ -71,3 +71,9 @@ const char *gwNomeVariavel(LPGW lp, int posicao)
 	return lpx_get_col_name(lp,posicao);
 }
 
+/* Escreve problema em um arquivo em formato FreeMPS */
+int gwGravaFreemps(LPGW lp, char *freemps)
+{
+	return(lpx_write_freemps(lp, freemps));
+}
+
