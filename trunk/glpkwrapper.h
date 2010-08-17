@@ -51,6 +51,9 @@ double gwValorVariavel(LPGW lp, int posicao)
 const char *gwNomeVariavel(LPGW lp, int posicao)
 ;
 
+/* Escreve problema em um arquivo em formato FreeMPS */
+int gwGravaFreemps(LPGW lp, char *freemps);
+
 #endif
 
 
