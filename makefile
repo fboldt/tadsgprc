@@ -39,3 +39,9 @@ ivtd_ftnet_esp:
 
 segatto:
 	gcc segatto.c glpkwrapper.c toolkit.c matsol.c mattraf.c -o segatto.bin -Wall -lglpk
+
+lbi_hmax_glass:
+	gcc lbi_hmax_glass.c mattraf.c toolkit.c -o lbi_hmax_glass -lglpk -Wall
+	
+milp_ftnet_glass:
+	gcc milp_ftnet_glass.c mattraf.c toolkit.c -o milp_ftnet_glass -lglpk -Wall

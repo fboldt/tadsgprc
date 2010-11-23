@@ -5,7 +5,7 @@
 /*    gcc lbi_hmax_glass.c mattraf.c toolkit.c -o lbi_hmax_glass -lglpk -Wall          */
 /*                                                                                     */
 /* Executar:                                                                           */
-/*    ./lbi_hmax_glass <arq_mod> <arq_data> <ntransc>                                  */
+/*    ./lbi_hmax_glass <arq_mod> <arq_data>                                            */
 
 #include <stdio.h>
 #include <glpk.h>
